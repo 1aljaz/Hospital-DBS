@@ -1,0 +1,34 @@
+# Laravel / PHP
+/vendor
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/.idea
+/.vscode
+/.phpunit.result.cache
+
+# Laravel environment
+.env
+.env.backup
+.env.local
+.env.testing
+.env.production
+
+# Database
+/database/*.sqlite
+/database/*.sql
+/database/*.sqlite3
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.log
+
+# npm / build artifacts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
