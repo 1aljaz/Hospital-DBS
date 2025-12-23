@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pregledi pacientov</title>
+    <link rel="stylesheet" href="../static/table.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="home-btn">🏠</a>
+        
+        <div class="nav-links">
+            <a href="#">Pregledi</a>
+            <a href="#">Diagnoze</a>
+        </div>
+        
+        <a href="/logout" class="logout-btn">Log Out</a>
+    </nav>
+
+    <div class="content">
+        <h1>Pregledi</h1>
+        
+        {% block title %}Podatki iz baze{% endblock %}
+        
+        {% block content %}
+        <div class="data-container">
+            <h2>Seznam pregledov</h2>
+        
+            <div class="table-controls">
+                <form action="/data" method="GET" class="filter-form">
+                    <input type="text" name="search" placeholder="Išči po imenu..." class="search-input">
+
+                    <select name="status" class="filter-select">
+                        <option value="">Vsi statusi</option>
+                        <option value="active">Aktiven</option>
+                        <option value="pending">Na čakanju</option>
+                        <option value="inactive">Neaktiven</option>
+                    </select>
+
+                    <button type="submit" class="filter-btn">Filtriraj</button>
+                </form>
+            </div>
+        
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Appointment ID</th>
+                            <th>Patient ID</th>
+                            <th>Staff ID</th>
+                            <th>Appointment date</th>
+                            <th>Appointment time</th>
+                            <th>status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in data_rows %}
+                        <tr>
+                            <td>{{ row.appointment_id }}</td>
+                            <td>{{ row.patient_id }}</td>
+                            <td>{{ row.staff_id}}</td>
+                            <td><span class="status-tag {{ row.status }}">{{ row.status }}</span></td>
+                            <td>{{ row.last_login }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+
+</body>
+</html>
