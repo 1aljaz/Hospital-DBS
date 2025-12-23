@@ -1,0 +1,67 @@
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# =========================
+# Virtual Environment
+# =========================
+venv/
+.env/
+.env.*
+ENV/
+env/
+
+# =========================
+# Flask
+# =========================
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Migrations (keep versions, ignore cache)
+# =========================
+migrations/__pycache__/
+
+# =========================
+# macOS
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# IDEs / Editors
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Test / Coverage
+# =========================
+.coverage
+htmlcov/
+.pytest_cache/
+
+# =========================
+# Secrets
+# =========================
+*.pem
+*.key
