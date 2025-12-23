@@ -1,16 +1,10 @@
-from app.db import get_db_connection
-from pathlib import Path
+# init_db.py
+from app import create_app
+from app.db import db
 
-SCHEMA_PATH = Path(__file__).parent / "sql" / "schema.sql"
+app = create_app()
 
-def init_db():
-    conn = get_db_connection()
-    with open(SCHEMA_PATH, "r") as f:
-        sql = f.read()
-        conn.executescript(sql)
-    conn.commit()
-    conn.close()
-    print("Database initialized successfully with tables!")
-
-if __name__ == "__main__":
-    init_db()
+with app.app_context():
+    # Create all tables based on SQLAlchemy models
+    db.create_all()
+    print("Database initialized successfully with all tables!")
