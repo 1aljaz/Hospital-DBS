@@ -11,8 +11,8 @@ def create_app():
     db.init_app(app)
     Migrate(app, db)
 
-    from .routes.main import index_bp
-    app.register_blueprint(index_bp)
+    from .routes.main import main_bp
+    app.register_blueprint(main_bp)
 
     #Login/logout auth
     from .routes.auth import auth_bp

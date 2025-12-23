@@ -1,3 +1,4 @@
+# app/models/appointment.py
 from app.db import db
 
 class Appointment(db.Model):
@@ -11,4 +12,6 @@ class Appointment(db.Model):
     status = db.Column(db.String)
 
     # Relationships
-    diagnoses = db.relationship("Diagnosis", backref="appointment")
+    patient = db.relationship("Patient", back_populates="appointments")
+    staff_member = db.relationship("Staff", back_populates="appointments")
+    diagnoses = db.relationship("Diagnosis", back_populates="appointment")

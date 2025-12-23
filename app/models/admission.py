@@ -1,3 +1,4 @@
+# app/models/admission.py
 from app.db import db
 
 class Admission(db.Model):
@@ -7,4 +8,8 @@ class Admission(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.patient_id"))
     bed_id = db.Column(db.Integer, db.ForeignKey("beds.bed_id"))
     admitted_date = db.Column(db.Date)
-    discharged_date = db.Column(db.Date)
+    discharged_date = db.Column(db.Date, nullable=True)
+
+    # Relationships
+    patient = db.relationship("Patient", back_populates="admissions")
+    bed = db.relationship("Bed", back_populates="admissions")

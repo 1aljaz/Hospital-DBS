@@ -1,3 +1,4 @@
+# app/models/room.py
 from app.db import db
 
 class Room(db.Model):
@@ -8,4 +9,5 @@ class Room(db.Model):
     department_id = db.Column(db.Integer, db.ForeignKey("departments.department_id"))
 
     # Relationships
-    beds = db.relationship("Bed", backref="room")
+    department = db.relationship("Department", back_populates="rooms")
+    beds = db.relationship("Bed", back_populates="room")
