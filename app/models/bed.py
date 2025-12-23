@@ -1,3 +1,4 @@
+# app/models/bed.py
 from app.db import db
 
 class Bed(db.Model):
@@ -8,4 +9,5 @@ class Bed(db.Model):
     status = db.Column(db.String)
 
     # Relationships
-    admissions = db.relationship("Admission", backref="bed")
+    room = db.relationship("Room", back_populates="beds")
+    admissions = db.relationship("Admission", back_populates="bed")

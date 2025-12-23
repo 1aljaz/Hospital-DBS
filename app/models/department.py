@@ -1,3 +1,4 @@
+# app/models/department.py
 from app.db import db
 
 class Department(db.Model):
@@ -8,5 +9,5 @@ class Department(db.Model):
     location = db.Column(db.String)
 
     # Relationships
-    staff_members = db.relationship("Staff", backref="department", lazy=True)
-    rooms = db.relationship("Room", backref="department")
+    staff_members = db.relationship("Staff", back_populates="department")
+    rooms = db.relationship("Room", back_populates="department")

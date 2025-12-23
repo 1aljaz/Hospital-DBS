@@ -1,3 +1,4 @@
+# app/models/patient.py
 from app.db import db
 
 class Patient(db.Model):
@@ -9,5 +10,6 @@ class Patient(db.Model):
     address = db.Column(db.String)
 
     # Relationships
-    appointments = db.relationship("Appointment", backref="patient")
-    admissions = db.relationship("Admission", backref="patient")
+    user = db.relationship("User", back_populates="patient")
+    appointments = db.relationship("Appointment", back_populates="patient")
+    admissions = db.relationship("Admission", back_populates="patient")
