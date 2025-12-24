@@ -48,3 +48,7 @@
     background-color: #ff4d4d;
     color: white;
 }
+
+body {
+    padding-top: 80px; /* Adds space so the content isn't hidden behind the navbar */
+}

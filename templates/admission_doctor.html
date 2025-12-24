@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprejemi - Zdravnik</title>
+    <link rel="stylesheet" href="../static/table.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/home_doctor" class="home-btn">🏠</a>
+        
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="/appointment_doctor">Pregledi</a>
+                <a href="/admission_doctor">Sprejemi</a>
+                <a href="/diagnosis_doctor">Diagnoze</a>
+            </div>
+            <a href="/logout" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Zdravniški portal</h1>
+
+        <div class="data-container">
+            <h2>Seznam sprejemov (Hospitalizacije)</h2>
+        
+            <div class="table-controls">
+                <form action="/admission_doctor" method="GET" class="filter-form">
+                    <input type="text" name="search" placeholder="Išči po ID pacienta ali postelje..." class="search-input">
+                    <button type="submit" class="filter-btn">Išči</button>
+                </form>
+            </div>
+        
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID Sprejema</th>
+                            <th>ID Pacienta</th>
+                            <th>ID Postelje</th>
+                            <th>Datum sprejema</th>
+                            <th>Datum odpusta</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in admission_rows %}
+                        <tr>
+                            <td>{{ row.admission_id }}</td>
+                            <td>{{ row.patient_id }}</td>
+                            <td>{{ row.bed_id }}</td>
+                            <td>{{ row.admitted_date }}</td>
+                            <td>{{ row.discharged_date if row.discharged_date else 'V bolnišnici' }}</td>
+                            <td>
+                                <a href="/update_admission/{{ row.admission_id }}" class="edit-btn">Posodobi</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px;">Ni aktivnih sprejemov.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

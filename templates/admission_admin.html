@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Sprejemi</title>
+    <link rel="stylesheet" href="../static/table.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/home_admin" class="home-btn">🏠</a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="/appointment_admin">Pregledi</a>
+                <a href="/user_admin">Uporabniki</a>
+                <a href="/department_admin">Oddelki</a>
+                <a href="/patient_admin">Pacienti</a>
+                <a href="/staff_admin">Zaposleni</a>
+                <a href="/room_admin">Sobe</a>
+                <a href="/bed_admin">Postelje</a>    
+                <a href="/admission_admin">Sprejemi</a>
+                <a href="/diagnosis_admin">Diagnoze</a>
+            </div>
+            <a href="/logout" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Admin Portal - Sprejemi v bolnišnico</h1>
+        <div class="data-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Evidenca sprejemov</h2>
+                <a href="/add_admission" class="edit-btn" style="background-color: #007bff;">+ Nov sprejem</a>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pacient</th>
+                            <th>Soba / Postelja</th>
+                            <th>Datum sprejema</th>
+                            <th>Datum odpusta</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in admission_rows %}
+                        <tr>
+                            <td>{{ row.admission_id }}</td>
+                            <td>{{ row.patient_name }}</td>
+                            <td>Soba {{ row.room_number }} / {{ row.bed_number }}</td>
+                            <td>{{ row.admission_date }}</td>
+                            <td>
+                                {% if row.discharge_date %}
+                                    {{ row.discharge_date }}
+                                {% else %}
+                                    <span class="status-tag active">Hospitaliziran</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/update_admission/{{ row.admission_id }}" class="edit-btn">Uredi</a>
+                                <a href="/delete_admission/{{ row.admission_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Oddelki</title>
+    <link rel="stylesheet" href="../static/table.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/home_admin" class="home-btn">🏠</a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="/appointment_admin">Pregledi</a>
+                <a href="/user_admin">Uporabniki</a>
+                <a href="/department_admin">Oddelki</a>
+                <a href="/patient_admin">Pacienti</a>
+                <a href="/staff_admin">Zaposleni</a>
+                <a href="/room_admin">Sobe</a>
+                <a href="/bed_admin">Postelje</a>    
+                <a href="/admission_admin">Sprejemi</a>
+                <a href="/diagnosis_admin">Diagnoze</a>
+            </div>
+            <a href="/logout" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+    <div class="content">
+        <h1>Admin Portal - Oddelki</h1>
+        <div class="data-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Seznam oddelkov</h2>
+                <a href="/add_department" class="edit-btn" style="background-color: #007bff;">+ Dodaj oddelek</a>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ime oddelka</th>
+                            <th>Lokacija</th>
+                            <th>Vodja oddelka</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in department_rows %}
+                        <tr>
+                            <td>{{ row.dept_id }}</td>
+                            <td>{{ row.dept_name }}</td>
+                            <td>{{ row.location }}</td>
+                            <td>{{ row.head_of_dept }}</td>
+                            <td>
+                                <a href="/update_dept/{{ row.dept_id }}" class="edit-btn">Uredi</a>
+                                <a href="/delete_dept/{{ row.dept_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

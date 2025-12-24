@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pregledi pacientov</title>
+    <title>Diagnoze pacienta</title>
     <link rel="stylesheet" href="../static/table.css">
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
@@ -28,20 +28,13 @@
         
         {% block content %}
         <div class="data-container">
-            <h2>Moji pregledi</h2>
+            <h2>Moje diagnoze</h2>
         
             <div class="table-controls">
-                <form action="/appointment_patient" method="GET" class="filter-form">
-                    <input type="text" name="search" placeholder="Išči po zdravniku ali datumu..." class="search-input">
-
-                    <select name="status" class="filter-select"> #Tu samo določi, kaj bodo možni vnosi za status
-                        <option value="">Vsi statusi</option>
-                        <option value="active">Aktiven</option>
-                        <option value="pending">Na čakanju</option>
-                        <option value="inactive">Zaključeno</option>
-                    </select>
-
-                    <button type="submit" class="filter-btn">Filtriraj</button>
+                <form action="/diagnosis_patient" method="GET" class="filter-form">
+                    <input type="text" name="search" placeholder="Išči po opisu (npr. gripa, poškodba)..." class="search-input">
+                    
+                    <button type="submit" class="filter-btn">Išči</button>
                 </form>
             </div>
         
@@ -49,28 +42,22 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>ID Diagnoze</th>
                             <th>ID Pregleda</th>
-                            <th>ID Osebja</th>
-                            <th>Datum</th>
-                            <th>Ura</th>
-                            <th>Status</th>
+                            <th>Opis diagnoze</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in data_rows %}
+                        {% for row in diagnosis_rows %}
                         <tr>
+                            <td>{{ row.diagnosis_id }}</td>
                             <td>{{ row.appointment_id }}</td>
-                            <td>{{ row.staff_id }}</td>
-                            <td>{{ row.appointment_date }}</td>
-                            <td>{{ row.appointment_time }}</td>
-                            <td>
-                                <span class="status-tag {{ row.status }}">{{ row.status }}</span>
-                            </td>
+                            <td>{{ row.description }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 20px;">
-                                Ni najdenih pregledov za vaš profil.
+                            <td colspan="3" style="text-align: center; padding: 20px;">
+                                Trenutno nimate zabeleženih diagnoz.
                             </td>
                         </tr>
                         {% endfor %}

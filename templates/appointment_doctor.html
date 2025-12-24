@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pregledi pacientov</title>
+    <title>Naročeni pacienti - Zdravnik</title>
     <link rel="stylesheet" href="../static/table.css">
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
@@ -11,30 +11,29 @@
 <body>
 
     <nav class="navbar">
-        <a href="/home_patient" class="home-btn">🏠</a>
+        <a href="/home_doctor" class="home-btn">🏠</a>
         
-        <div class="nav-links">
-            <a href="/appointment_patient">pregledi</a>
-            <a href="/diagnosis_patient">diagnoze</a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="/appointment_doctor">Pregledi</a>
+                <a href="/admission_doctor">Sprejemi</a>
+                <a href="/diagnosis_doctor">Diagnoze</a>
+            </div>
+            <a href="/logout" class="logout-btn">Odjava</a>
         </div>
-        
-        <a href="/logut" class="logout-btn">Log Out</a>
     </nav>
 
     <div class="content">
-        <h1>Portal za paciente</h1>
+        <h1>Zdravniški portal</h1>
 
-        {% block title %}{% endblock %}
-        
-        {% block content %}
         <div class="data-container">
-            <h2>Moji pregledi</h2>
+            <h2>Moji naročeni pacienti</h2>
         
             <div class="table-controls">
-                <form action="/appointment_patient" method="GET" class="filter-form">
-                    <input type="text" name="search" placeholder="Išči po zdravniku ali datumu..." class="search-input">
+                <form action="/appointment_doctor" method="GET" class="filter-form">
+                    <input type="text" name="search" placeholder="Išči pacienta (Ime ali ID)..." class="search-input">
 
-                    <select name="status" class="filter-select"> #Tu samo določi, kaj bodo možni vnosi za status
+                    <select name="status" class="filter-select">
                         <option value="">Vsi statusi</option>
                         <option value="active">Aktiven</option>
                         <option value="pending">Na čakanju</option>
@@ -49,28 +48,30 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID Pregleda</th>
-                            <th>ID Osebja</th>
-                            <th>Datum</th>
+                            <th>ID</th>
+                            <th>Pacient</th> <th>Datum</th>
                             <th>Ura</th>
                             <th>Status</th>
-                        </tr>
+                            <th>Akcije</th> </tr>
                     </thead>
                     <tbody>
                         {% for row in data_rows %}
                         <tr>
                             <td>{{ row.appointment_id }}</td>
-                            <td>{{ row.staff_id }}</td>
+                            <td>{{ row.patient_id }}</td>
                             <td>{{ row.appointment_date }}</td>
                             <td>{{ row.appointment_time }}</td>
                             <td>
                                 <span class="status-tag {{ row.status }}">{{ row.status }}</span>
                             </td>
+                            <td>
+                                <a href="/update_appointment/{{ row.appointment_id }}" class="edit-btn">Posodobi</a>
+                            </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 20px;">
-                                Ni najdenih pregledov za vaš profil.
+                            <td colspan="6" style="text-align: center; padding: 20px;">
+                                nimate naročenih pacientov.
                             </td>
                         </tr>
                         {% endfor %}
@@ -78,8 +79,6 @@
                 </table>
             </div>
         </div>
-        {% endblock %}
     </div>
-
 </body>
 </html>

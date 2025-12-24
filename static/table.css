@@ -82,3 +82,22 @@ tr:hover {
 .status-tag.active { background: #d4edda; color: #155724; }
 .status-tag.pending { background: #fff3cd; color: #856404; }
 .status-tag.inactive { background: #f8d7da; color: #721c24; }
+
+/* Gumb za urejanje (za zdravniški in admin pogled) */
+.edit-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 6px 12px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    display: inline-block;
+    transition: background 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background-color: #218838;
+    color: white;
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - pregledi</title>
+    <link rel="stylesheet" href="../static/table.css">
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/home_admin" class="home-btn">🏠</a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="/appointment_admin">Pregledi</a>
+                <a href="/user_admin">Uporabniki</a>
+                <a href="/department_admin">Oddelki</a>
+                <a href="/patient_admin">Pacienti</a>
+                <a href="/staff_admin">Zaposleni</a>
+                <a href="/room_admin">Sobe</a>
+                <a href="/bed_admin">Postelje</a>    
+                <a href="/admission_admin">Sprejemi</a>
+                <a href="/diagnosis_admin">Diagnoze</a>
+            </div>
+            <a href="/logout" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Admin Portal - Pregledi</h1>
+        <div class="data-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Seznam vseh uporabnikov</h2>
+                <a href="/add_appointment" class="edit-btn" style="background-color: #007bff;">+ Dodaj pregled</a>
+            </div>
+            <h2>Arhiv vseh sistemskih pregledov</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Pacient ID</th>
+                            <th>Osebje ID</th>
+                            <th>Datum in ura</th>
+                            <th>Status</th>
+                            <th>Akcije</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in appointment_rows %}
+                        <tr>
+                            <td>{{ row.appointment_id }}</td>
+                            <td>{{ row.patient_id }}</td>
+                            <td>{{ row.staff_id }}</td>
+                            <td>{{ row.appointment_date }} ob {{ row.appointment_time }}</td>
+                            <td><span class="status-tag {{ row.status }}">{{ row.status }}</span></td>
+                            <td>
+                                <a href="/update_app/{{ row.appointment_id }}" class="edit-btn">Uredi</a>
+                                <a href="/delete_app/{{ row.appointment_id }}" class="edit-btn" style="background-color: #dc3545;">Izbriši</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
