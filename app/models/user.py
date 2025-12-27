@@ -1,5 +1,6 @@
 # app/models/user.py
 from app.db import db
+from flask_login import UserMixin
 import enum
 
 class RoleEnum(enum.Enum):
@@ -7,7 +8,7 @@ class RoleEnum(enum.Enum):
     DOCTOR = "doctor"
     PATIENT = "patient"
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "user"
 
     user_id = db.Column(db.Integer, primary_key=True)
@@ -30,3 +31,6 @@ class User(db.Model):
 
     def is_patient(self):
         return self.role == RoleEnum.PATIENT
+    
+    def get_id(self):
+        return str(self.user_id)

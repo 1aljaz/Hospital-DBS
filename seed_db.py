@@ -30,4 +30,4 @@ with app.app_context():
     print("Creating diagnoses for appointments...")
     diagnoses = create_diagnoses(appointments)
 
-    print("Database fully seeded with realistic data!")
+    print("Database fully seeded.")

@@ -8,29 +8,49 @@
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
 </head>
-<body>
+<body class="has-navbar">
 
     <nav class="navbar">
-        <a href="/home_doctor" class="home-btn">🏠</a>
+        <a href="{{ url_for('main.doctor_dashboard') }}" class="home-btn">🏠</a>
         
         <div class="nav-right">
             <div class="nav-links">
-                <a href="/appointment_doctor">Pregledi</a>
-                <a href="/admission_doctor">Sprejemi</a>
-                <a href="/diagnosis_doctor">Diagnoze</a>
+                <a href="{{ url_for('main.appointment_doctor') }}">Pregledi</a>
+                <a href="{{ url_for('main.admission_doctor') }}">Sprejemi</a>
+                <a href="{{ url_for('main.diagnosis_doctor') }}">Diagnoze</a>
             </div>
-            <a href="/logout" class="logout-btn">Odjava</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
 
     <div class="content">
         <h1>Zdravniški portal</h1>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'success' %}
+                        <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: #d4edda; color: #155724;">
+                            {{ message }}
+                        </div>
+                    {% elif category == 'danger' %}
+                        <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: #f8d7da; color: #721c24;">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: #d1ecf1; color: #0c5460;">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <div class="data-container">
             <h2>Seznam sprejemov (Hospitalizacije)</h2>
         
             <div class="table-controls">
-                <form action="/admission_doctor" method="GET" class="filter-form">
+                <form action="{{ url_for('main.admission_doctor') }}" method="GET" class="filter-form">
                     <input type="text" name="search" placeholder="Išči po ID pacienta ali postelje..." class="search-input">
                     <button type="submit" class="filter-btn">Išči</button>
                 </form>
@@ -41,8 +61,8 @@
                     <thead>
                         <tr>
                             <th>ID Sprejema</th>
-                            <th>ID Pacienta</th>
-                            <th>ID Postelje</th>
+                            <th>Pacient</th>
+                            <th>Postelja</th>
                             <th>Datum sprejema</th>
                             <th>Datum odpusta</th>
                             <th>Akcije</th>
@@ -52,12 +72,12 @@
                         {% for row in admission_rows %}
                         <tr>
                             <td>{{ row.admission_id }}</td>
-                            <td>{{ row.patient_id }}</td>
-                            <td>{{ row.bed_id }}</td>
+                            <td>{{ row.patient_name }} (ID: {{ row.patient_id }})</td>
+                            <td>{{ row.bed_info }}</td>
                             <td>{{ row.admitted_date }}</td>
                             <td>{{ row.discharged_date if row.discharged_date else 'V bolnišnici' }}</td>
                             <td>
-                                <a href="/update_admission/{{ row.admission_id }}" class="edit-btn">Posodobi</a>
+                                <a href="{{ url_for('main.update_admission', admission_id=row.admission_id) }}" class="edit-btn">Posodobi</a>
                             </td>
                         </tr>
                         {% else %}

@@ -8,29 +8,52 @@
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
 </head>
-<body>
+<body class="has-navbar">
 
     <nav class="navbar">
-        <a href="/home_doctor" class="home-btn">🏠</a>
+        <a href="{{ url_for('main.doctor_dashboard') }}" class="home-btn">🏠</a>
         
         <div class="nav-right">
             <div class="nav-links">
-                <a href="/appointment_doctor">Pregledi</a>
-                <a href="/admission_doctor">Sprejemi</a>
-                <a href="/diagnosis_doctor">Diagnoze</a>
+                <a href="{{ url_for('main.appointment_doctor') }}">Pregledi</a>
+                <a href="{{ url_for('main.admission_doctor') }}">Sprejemi</a>
+                <a href="{{ url_for('main.diagnosis_doctor') }}">Diagnoze</a>
             </div>
-            <a href="/logout" class="logout-btn">Odjava</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
 
     <div class="content">
         <h1>Zdravniški portal</h1>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'success' %}
+                        <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: #d4edda; color: #155724;">
+                            {{ message }}
+                        </div>
+                    {% elif category == 'danger' %}
+                        <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: #f8d7da; color: #721c24;">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: #d1ecf1; color: #0c5460;">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
         <div class="data-container">
-            <h2>Moji naročeni pacienti</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Moji naročeni pacienti</h2>
+                <a href="{{ url_for('main.add_appointment') }}" class="edit-btn" style="background-color: #007bff;">+ Nov pregled</a>
+            </div>
         
             <div class="table-controls">
-                <form action="/appointment_doctor" method="GET" class="filter-form">
+                <form action="{{ url_for('main.appointment_doctor') }}" method="GET" class="filter-form">
                     <input type="text" name="search" placeholder="Išči pacienta (Ime ali ID)..." class="search-input">
 
                     <select name="status" class="filter-select">
@@ -58,14 +81,17 @@
                         {% for row in data_rows %}
                         <tr>
                             <td>{{ row.appointment_id }}</td>
-                            <td>{{ row.patient_id }}</td>
+                            <td>{{ row.patient_name }} (ID: {{ row.patient_id }})</td>
                             <td>{{ row.appointment_date }}</td>
                             <td>{{ row.appointment_time }}</td>
                             <td>
                                 <span class="status-tag {{ row.status }}">{{ row.status }}</span>
                             </td>
                             <td>
-                                <a href="/update_appointment/{{ row.appointment_id }}" class="edit-btn">Posodobi</a>
+                                <a href="{{ url_for('main.update_appointment', appointment_id=row.appointment_id) }}" class="edit-btn">Posodobi</a>
+                                <form action="{{ url_for('main.delete_appointment', appointment_id=row.appointment_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545; margin-left: 5px;" onclick="return confirm('Ali ste prepričani, da želite izbrisati ta pregled?');">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% else %}

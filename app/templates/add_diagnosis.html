@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodaj diagnozo - Zdravnik</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('main.doctor_dashboard') }}" class="home-btn">🏠</a>
+        
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="{{ url_for('main.appointment_doctor') }}">Pregledi</a>
+                <a href="{{ url_for('main.admission_doctor') }}">Sprejemi</a>
+                <a href="{{ url_for('main.diagnosis_doctor') }}">Diagnoze</a>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Dodaj novo diagnozo</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: {% if category == 'success' %}#d4edda{% elif category == 'danger' %}#f8d7da{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'danger' %}#721c24{% else %}#0c5460{% endif %};">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="data-container">
+            <form method="POST" style="max-width: 600px; margin: 0 auto;">
+                <div style="margin-bottom: 20px;">
+                    <label for="appointment_id" style="display: block; margin-bottom: 5px; font-weight: bold;">Pregled:</label>
+                    <select name="appointment_id" id="appointment_id" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Izberite pregled</option>
+                        {% for appointment in appointments %}
+                        <option value="{{ appointment.appointment_id }}">
+                            ID: {{ appointment.appointment_id }} - {{ appointment.appointment_date }} {{ appointment.appointment_time }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="description" style="display: block; margin-bottom: 5px; font-weight: bold;">Opis diagnoze:</label>
+                    <textarea name="description" id="description" rows="5" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Dodaj diagnozo</button>
+                    <a href="{{ url_for('main.diagnosis_doctor') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+

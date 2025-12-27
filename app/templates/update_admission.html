@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posodobi sprejem - Zdravnik</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('main.doctor_dashboard') }}" class="home-btn">🏠</a>
+        
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="{{ url_for('main.appointment_doctor') }}">Pregledi</a>
+                <a href="{{ url_for('main.admission_doctor') }}">Sprejemi</a>
+                <a href="{{ url_for('main.diagnosis_doctor') }}">Diagnoze</a>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Posodobi sprejem</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: {% if category == 'success' %}#d4edda{% elif category == 'danger' %}#f8d7da{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'danger' %}#721c24{% else %}#0c5460{% endif %};">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="data-container">
+            <form method="POST" style="max-width: 600px; margin: 0 auto;">
+                <div style="margin-bottom: 20px;">
+                    <label for="patient_id" style="display: block; margin-bottom: 5px; font-weight: bold;">Pacient:</label>
+                    <select name="patient_id" id="patient_id" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        {% for patient in patients %}
+                        <option value="{{ patient.patient_id }}" {% if patient.patient_id == admission.patient_id %}selected{% endif %}>
+                            {{ patient.user.name }} (ID: {{ patient.patient_id }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="bed_id" style="display: block; margin-bottom: 5px; font-weight: bold;">Postelja:</label>
+                    <select name="bed_id" id="bed_id" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        {% for bed in beds %}
+                        <option value="{{ bed.bed_id }}" {% if bed.bed_id == admission.bed_id %}selected{% endif %}>
+                            Postelja {{ bed.bed_id }} (Soba: {{ bed.room_id }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="admitted_date" style="display: block; margin-bottom: 5px; font-weight: bold;">Datum sprejema:</label>
+                    <input type="date" name="admitted_date" id="admitted_date" value="{{ admission.admitted_date }}" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="discharged_date" style="display: block; margin-bottom: 5px; font-weight: bold;">Datum odpusta (neobvezno):</label>
+                    <input type="date" name="discharged_date" id="discharged_date" value="{{ admission.discharged_date if admission.discharged_date else '' }}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Posodobi sprejem</button>
+                    <a href="{{ url_for('main.admission_doctor') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+
