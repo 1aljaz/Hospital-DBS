@@ -11,7 +11,7 @@
 <body>
 
     <nav class="navbar">
-        <a href="/home_admin" class="home-btn">🏠</a>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="home-btn">🏠</a>
         <div class="nav-right">
             <div class="nav-links">
                 <a href="/appointment_admin">Pregledi</a>
@@ -24,7 +24,7 @@
                 <a href="/admission_admin">Sprejemi</a>
                 <a href="/diagnosis_admin">Diagnoze</a>
             </div>
-            <a href="/logout" class="logout-btn">Odjava</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
     
@@ -35,6 +35,17 @@
                 <h2>Seznam zaposlenih</h2>
                 <a href="/add_staff" class="edit-btn" style="background-color: #007bff;">+ Dodaj zaposlenega</a>
             </div>
+            
+            <div class="table-controls" style="margin-bottom: 20px;">
+                <form action="/staff_admin" method="GET" class="filter-form">
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Išči po imenu, oddelku ali ID..." class="search-input">
+                    <button type="submit" class="filter-btn">Išči</button>
+                    {% if search %}
+                    <a href="/staff_admin" class="filter-btn" style="background-color: #6c757d; text-decoration: none; color: white; padding: 8px 15px; border-radius: 4px;">Počisti</a>
+                    {% endif %}
+                </form>
+            </div>
+            
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -56,13 +67,18 @@
                             <td>{{ row.department_name }}</td>
                             <td><span class="status-tag active">Aktiven</span></td>
                             <td>
+                                <!-- Edit button -->
                                 <a href="/update_staff/{{ row.staff_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_staff/{{ row.staff_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                
+                                <!-- Delete button as form -->
+                                <form action="/delete_staff/{{ row.staff_id }}" method="POST" style="display:inline;" onsubmit="return confirm('Ste prepričani, da želite izbrisati tega zaposlenega?')">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545;">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                </table>
+                </table>                
             </div>
         </div>
     </div>

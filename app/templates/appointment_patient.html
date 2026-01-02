@@ -11,14 +11,15 @@
 <body>
 
     <nav class="navbar">
-        <a href="/home_patient" class="home-btn">🏠</a>
+        <a href="/patient" class="home-btn">🏠</a>
         
         <div class="nav-links">
             <a href="/appointment_patient">pregledi</a>
             <a href="/diagnosis_patient">diagnoze</a>
+            <a href="/admission_patient">sprejemi</a>
         </div>
         
-        <a href="/logut" class="logout-btn">Log Out</a>
+        <a href="{{ url_for('auth.logout') }}" class="logout-btn">Log Out</a>
     </nav>
 
     <div class="content">
@@ -50,7 +51,7 @@
                     <thead>
                         <tr>
                             <th>ID Pregleda</th>
-                            <th>ID Osebja</th>
+                            <th>Ime Osebja</th>
                             <th>Datum</th>
                             <th>Ura</th>
                             <th>Status</th>
@@ -60,7 +61,7 @@
                         {% for row in data_rows %}
                         <tr>
                             <td>{{ row.appointment_id }}</td>
-                            <td>{{ row.staff_id }}</td>
+                            <td>{{ row.staff_name }}</td>
                             <td>{{ row.appointment_date }}</td>
                             <td>{{ row.appointment_time }}</td>
                             <td>

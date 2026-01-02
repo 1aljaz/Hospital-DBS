@@ -1,6 +1,7 @@
 from app import create_app
 from app.db import db
 from app.factories import (
+    create_admin,
     create_departments_and_staff,
     create_patients,
     create_rooms_and_beds,
@@ -12,6 +13,9 @@ from app.factories import (
 app = create_app()
 
 with app.app_context():
+    print("Creating admin user...")
+    admin = create_admin()
+    
     print("Creating departments and staff...")
     departments, staff_members = create_departments_and_staff(num_departments=3, num_doctors_per_dept=3)
 

@@ -11,7 +11,7 @@
 <body>
 
     <nav class="navbar">
-        <a href="/home_admin" class="home-btn">🏠</a>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="home-btn">🏠</a>
         <div class="nav-right">
             <div class="nav-links">
                 <a href="/appointment_admin">Pregledi</a>
@@ -24,7 +24,7 @@
                 <a href="/admission_admin">Sprejemi</a>
                 <a href="/diagnosis_admin">Diagnoze</a>
             </div>
-            <a href="/logout" class="logout-btn">Odjava</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
     
@@ -35,14 +35,24 @@
                 <h2>Seznam postelj</h2>
                 <a href="/add_bed" class="edit-btn" style="background-color: #007bff;">+ Dodaj posteljo</a>
             </div>
+            
+            <div class="table-controls" style="margin-bottom: 20px;">
+                <form action="/bed_admin" method="GET" class="filter-form">
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Išči po statusu, ID postelje ali ID sobe..." class="search-input">
+                    <button type="submit" class="filter-btn">Išči</button>
+                    {% if search %}
+                    <a href="/bed_admin" class="filter-btn" style="background-color: #6c757d; text-decoration: none; color: white; padding: 8px 15px; border-radius: 4px;">Počisti</a>
+                    {% endif %}
+                </form>
+            </div>
+            
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Oznaka postelje</th>
-                            <th>Pripadajoča soba</th>
-                            <th>Status zasedenosti</th>
+                            <th>ID Sobe</th>
+                            <th>Status</th>
                             <th>Akcije</th>
                         </tr>
                     </thead>
@@ -50,11 +60,10 @@
                         {% for row in bed_rows %}
                         <tr>
                             <td>{{ row.bed_id }}</td>
-                            <td>{{ row.bed_number }}</td>
-                            <td>{{ row.room_number }}</td>
+                            <td>{{ row.room_id }}</td>
                             <td>
-                                <span class="status-tag {% if row.is_occupied %}inactive{% else %}active{% endif %}">
-                                    {% if row.is_occupied %}Zasedena{% else %}Prosta{% endif %}
+                                <span class="status-tag {{ row.status }}">
+                                    {{ row.status }}
                                 </span>
                             </td>
                             <td>

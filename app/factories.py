@@ -22,6 +22,27 @@ def random_gender():
     return random.choice(["Male", "Female", "Other"])
 
 
+def create_admin():
+    """Create admin user with username 'admin' and password 'root'"""
+    # Check if admin already exists
+    existing_admin = User.query.filter_by(username="admin").first()
+    if existing_admin:
+        print("Admin user already exists, skipping creation.")
+        return existing_admin
+    
+    admin_user = User(
+        name="Administrator",
+        username="admin",
+        password_hash=generate_password_hash("root"),
+        role=RoleEnum.ADMIN,
+        phone=None
+    )
+    db.session.add(admin_user)
+    db.session.commit()
+    print("Admin user created: username='admin', password='root'")
+    return admin_user
+
+
 def create_departments_and_staff(num_departments=3, num_doctors_per_dept=3):
     departments = []
     staff_members = []

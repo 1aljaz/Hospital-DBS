@@ -11,10 +11,12 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 def login():
     # Redirect if already logged in
     if current_user.is_authenticated:
-        if current_user.role.value == "admin":
+        if current_user.is_admin():
             return redirect(url_for("main.admin_dashboard"))
-        elif current_user.role.value == "doctor":
+        elif current_user.is_doctor():
             return redirect(url_for("main.doctor_dashboard"))
+        elif current_user.is_patient():
+            return redirect(url_for("main.patient_dashboard"))
         else:
             return redirect(url_for("main.index"))
     
@@ -38,13 +40,17 @@ def login():
                 print(f"Redirecting to next URL: {next_url}")
                 return redirect(next_url)
             
-            if user.role.value == "admin":
+            if user.is_admin():
                 target_url = url_for("main.admin_dashboard")
                 print(f"Redirecting to admin dashboard: {target_url}")
                 return redirect(target_url)
-            elif user.role.value == "doctor":
+            elif user.is_doctor():
                 target_url = url_for("main.doctor_dashboard")
                 print(f"Redirecting to doctor dashboard: {target_url}")
+                return redirect(target_url)
+            elif user.is_patient():
+                target_url = url_for("main.patient_dashboard")
+                print(f"Redirecting to patient dashboard: {target_url}")
                 return redirect(target_url)
             else:
                 target_url = url_for("main.index")

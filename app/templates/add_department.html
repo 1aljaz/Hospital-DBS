@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodaj oddelke - Admin</title>
+    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="{{ url_for('main.admin_dashboard') }}" class="home-btn">🏠</a>
+        
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="{{ url_for('main.appointment_admin') }}">Pregledi</a>
+                <a href="{{ url_for('main.admission_admin') }}">Sprejemi</a>
+                <a href="{{ url_for('main.diagnosis_admin') }}">Diagnoze</a>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+
+    <div class="content">
+        <h1>Dodaj nov oddelke</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div style="padding: 10px; margin-bottom: 20px; border-radius: 4px; background-color: {% if category == 'success' %}#d4edda{% elif category == 'danger' %}#f8d7da{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'danger' %}#721c24{% else %}#0c5460{% endif %};">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="data-container">
+            <form method="POST" style="max-width: 600px; margin: 0 auto;">
+                <div style="margin-bottom: 20px;">
+                    <label for="name" style="display: block; margin-bottom: 5px; font-weight: bold;">Ime oddelka:</label>
+                    <input type="text" name="name" id="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label for="location" style="display: block; margin-bottom: 5px; font-weight: bold;">Lokacija:</label>
+                    <input type="text" name="location" id="location" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Dodaj oddelke</button>
+                    <a href="{{ url_for('main.department_admin') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
+

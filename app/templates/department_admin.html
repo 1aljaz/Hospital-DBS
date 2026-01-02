@@ -11,7 +11,7 @@
 <body>
 
     <nav class="navbar">
-        <a href="/home_admin" class="home-btn">🏠</a>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="home-btn">🏠</a>
         <div class="nav-right">
             <div class="nav-links">
                 <a href="/appointment_admin">Pregledi</a>
@@ -24,7 +24,7 @@
                 <a href="/admission_admin">Sprejemi</a>
                 <a href="/diagnosis_admin">Diagnoze</a>
             </div>
-            <a href="/logout" class="logout-btn">Odjava</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
     <div class="content">
@@ -34,6 +34,17 @@
                 <h2>Seznam oddelkov</h2>
                 <a href="/add_department" class="edit-btn" style="background-color: #007bff;">+ Dodaj oddelek</a>
             </div>
+            
+            <div class="table-controls" style="margin-bottom: 20px;">
+                <form action="/department_admin" method="GET" class="filter-form">
+                    <input type="text" name="search" value="{{ search or '' }}" placeholder="Išči po imenu, lokaciji ali ID..." class="search-input">
+                    <button type="submit" class="filter-btn">Išči</button>
+                    {% if search %}
+                    <a href="/department_admin" class="filter-btn" style="background-color: #6c757d; text-decoration: none; color: white; padding: 8px 15px; border-radius: 4px;">Počisti</a>
+                    {% endif %}
+                </form>
+            </div>
+            
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -41,17 +52,15 @@
                             <th>ID</th>
                             <th>Ime oddelka</th>
                             <th>Lokacija</th>
-                            <th>Vodja oddelka</th>
                             <th>Akcije</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in department_rows %}
                         <tr>
-                            <td>{{ row.dept_id }}</td>
-                            <td>{{ row.dept_name }}</td>
+                            <td>{{ row.department_id }}</td>
+                            <td>{{ row.name }}</td>
                             <td>{{ row.location }}</td>
-                            <td>{{ row.head_of_dept }}</td>
                             <td>
                                 <a href="/update_dept/{{ row.dept_id }}" class="edit-btn">Uredi</a>
                                 <a href="/delete_dept/{{ row.dept_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>

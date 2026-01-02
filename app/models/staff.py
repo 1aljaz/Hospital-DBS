@@ -13,3 +13,6 @@ class Staff(db.Model):
     user = db.relationship("User", back_populates="staff")
     department = db.relationship("Department", back_populates="staff_members")
     appointments = db.relationship("Appointment", back_populates="staff_member")
+
+    def name(self):
+        return self.user.name if self.user else None

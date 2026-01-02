@@ -10,7 +10,7 @@
 <body>
 
     <nav class="navbar">
-        <a href="/home_admin" class="home-btn">🏠</a>
+        <a href="{{ url_for('main.admin_dashboard') }}" class="home-btn">🏠</a>
         <div class="nav-right">
             <div class="nav-links">
                 <a href="/appointment_admin">Pregledi</a>
@@ -23,7 +23,7 @@
                 <a href="/admission_admin">Sprejemi</a>
                 <a href="/diagnosis_admin">Diagnoze</a>
             </div>
-            <a href="/logout" class="logout-btn">Odjava</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
     <div class="content">

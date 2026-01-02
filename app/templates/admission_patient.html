@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diagnoze pacienta</title>
+    <title>Sprejemi - Pacient</title>
     <link rel="stylesheet" href="../static/table.css">
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
@@ -29,12 +29,11 @@
         
         {% block content %}
         <div class="data-container">
-            <h2>Moje diagnoze</h2>
+            <h2>Moji sprejemi</h2>
         
             <div class="table-controls">
-                <form action="/diagnosis_patient" method="GET" class="filter-form">
-                    <input type="text" name="search" placeholder="Išči po opisu (npr. gripa, poškodba)..." class="search-input">
-                    
+                <form action="/admission_patient" method="GET" class="filter-form">
+                    <input type="text" name="search" placeholder="Išči po ID postelje..." class="search-input">
                     <button type="submit" class="filter-btn">Išči</button>
                 </form>
             </div>
@@ -43,22 +42,24 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>ID Diagnoze</th>
-                            <th>ID Pregleda</th>
-                            <th>Opis diagnoze</th>
+                            <th>ID Sprejema</th>
+                            <th>Postelja</th>
+                            <th>Datum sprejema</th>
+                            <th>Datum odpusta</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for row in diagnosis_rows %}
+                        {% for row in admission_rows %}
                         <tr>
-                            <td>{{ row.diagnosis_id }}</td>
-                            <td>{{ row.appointment_id }}</td>
-                            <td>{{ row.description }}</td>
+                            <td>{{ row.admission_id }}</td>
+                            <td>{{ row.bed_info }}</td>
+                            <td>{{ row.admitted_date }}</td>
+                            <td>{{ row.discharged_date if row.discharged_date else 'V bolnišnici' }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="3" style="text-align: center; padding: 20px;">
-                                Trenutno nimate zabeleženih diagnoz.
+                            <td colspan="4" style="text-align: center; padding: 20px;">
+                                Trenutno nimate zabeleženih sprejemov.
                             </td>
                         </tr>
                         {% endfor %}
@@ -71,3 +72,4 @@
 
 </body>
 </html>
+
