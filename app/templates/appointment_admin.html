@@ -33,7 +33,7 @@
         <div class="data-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2>Arhiv vseh sistemskih pregledov</h2>
-                <a href="/add_appointment" class="edit-btn" style="background-color: #007bff;">+ Dodaj pregled</a>
+                <a href="/add_appointment_admin" class="edit-btn" style="background-color: #007bff;">+ Dodaj pregled</a>
             </div>
             
             <div class="table-controls" style="margin-bottom: 20px;">
@@ -67,8 +67,10 @@
                             <td>{{ row.appointment_date }} ob {{ row.appointment_time }}</td>
                             <td><span class="status-tag {{ row.status }}">{{ row.status }}</span></td>
                             <td>
-                                <a href="/update_app/{{ row.appointment_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_app/{{ row.appointment_id }}" class="edit-btn" style="background-color: #dc3545;">Izbriši</a>
+                                <a href="{{ url_for('main.update_appointment_admin', appointment_id=row.appointment_id) }}" class="edit-btn">Uredi</a>
+                                <form action="{{ url_for('main.delete_appointment', appointment_id=row.appointment_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545; margin-left: 5px;" onclick="return confirm('Ali ste prepričani, da želite izbrisati ta pregled?');">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
