@@ -62,8 +62,10 @@
                             <td>{{ row.name }}</td>
                             <td>{{ row.location }}</td>
                             <td>
-                                <a href="/update_dept/{{ row.dept_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_dept/{{ row.dept_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                                <a href="{{ url_for('main.update_department', department_id=row.department_id) }}" class="edit-btn">Uredi</a>
+                                <form action="{{ url_for('main.delete_department', department_id=row.department_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545; margin-left: 5px;" onclick="return confirm('Ali ste prepričani, da želite izbrisati ta oddelek?');">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dodaj zaposlenega - Admin</title>
+    <title>Dodaj sobo - Admin</title>
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
 </head>
@@ -28,7 +28,7 @@
     </nav>
 
     <div class="content">
-        <h1>Dodaj novega zaposlenega</h1>
+        <h1>Dodaj novo sobo</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -43,31 +43,27 @@
         <div class="data-container">
             <form method="POST" style="max-width: 600px; margin: 0 auto;">
                 <div style="margin-bottom: 20px;">
-                    <label for="name" style="display: block; margin-bottom: 5px; font-weight: bold;">Ime in priimek:</label>
-                    <input type="text" name="name" id="name" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label for="name" style="display: block; margin-bottom: 5px; font-weight: bold;">Tip:</label>
+                    <input type="text" name="room_type" id="room_type" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <label for="username" style="display: block; margin-bottom: 5px; font-weight: bold;">Uporabniško ime:</label>
-                    <input type="text" name="username" id="username" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label for="password" style="display: block; margin-bottom: 5px; font-weight: bold;">Geslo:</label>
-                    <input type="password" name="password" id="password" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                </div>
-
-                <div style="margin-bottom: 20px;">
-                    <label for="role" style="display: block; margin-bottom: 5px; font-weight: bold;">Vloga:</label>
-                    <select name="role" id="role" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <option value="admin">Admin</option>
-                        <option value="doctor">Zdravnik</option>
+                    <label for="department_id"
+                        style="display: block; margin-bottom: 5px; font-weight: bold;">Oddelek:</label>
+                    <select name="department_id" id="department_id" required
+                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <option value="">Izberite oddelek</option>
+                        {% for department in departments %}
+                        <option value="{{ department.department_id }}">
+                            {{ department.name }}
+                        </option>
+                        {% endfor %}
                     </select>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Dodaj zaposlenega</button>
-                    <a href="{{ url_for('main.staff_admin') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
+                    <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Dodaj sobo</button>
+                    <a href="{{ url_for('main.room_admin') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
                 </div>
             </form>
         </div>

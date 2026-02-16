@@ -68,7 +68,9 @@
                             </td>
                             <td>
                                 <a href="/update_bed/{{ row.bed_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_bed/{{ row.bed_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                                <form action="{{ url_for('main.delete_bed', bed_id=row.bed_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545; margin-left: 5px;" onclick="return confirm('Ali ste prepričani, da želite izbrisati to posteljo?');">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}

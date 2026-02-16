@@ -68,7 +68,9 @@
                             <td>{{ row.address }}</td>
                             <td>
                                 <a href="/update_patient/{{ row.patient_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_patient/{{ row.patient_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                                <form action="/delete_patient/{{ row.patient_id }}" method="POST" style="display:inline;" onsubmit="return confirm('Ste prepričani, da želite izbrisati tega pacienta?')">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545;">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
