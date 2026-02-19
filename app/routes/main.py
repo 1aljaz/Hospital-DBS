@@ -205,6 +205,47 @@ def add_department():
     
     return render_template("add_department.html", user=current_user)
 
+@main_bp.route("/update_department/<int:department_id>", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def update_department(department_id):
+
+    
+    department = Department.query.get_or_404(department_id)
+    
+    if request.method == "POST":
+        try:
+            department.name = request.form.get('department_name')
+            department.location = request.form.get('department_location')
+            
+            db.session.commit()
+            flash("Oddelek uspešno posodobljen", "success")
+            return redirect(url_for("main.department_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri posodabljanju oddelka: {str(e)}", "danger")
+    
+
+    return render_template("update_department.html", department=department, user=current_user)
+
+@main_bp.route("/delete_department/<int:department_id>", methods=["POST"])
+@login_required
+@roles_required("admin")
+def delete_department(department_id):
+
+    department = Department.query.get_or_404(department_id)
+    
+    try:
+        db.session.delete(department)
+        db.session.commit()
+        flash("Oddelek uspešno izbrisan", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Napaka pri brisanju oddelka: {str(e)}", "danger")
+    
+    return redirect(url_for("main.department_admin"))
+
+
 # CRUD Operations for Staff
 # Add Staff
 @main_bp.route("/add_staff", methods=["GET", "POST"])
@@ -260,17 +301,23 @@ def add_staff():
 @roles_required("admin")
 def update_staff(staff_id):
     staff = Staff.query.get_or_404(staff_id)
+    user = User.query.get_or_404(staff.user_id)
     if request.method == "POST":
         try:
-            staff.name = request.form.get('name', '').strip()
-            staff.username = request.form.get('username', '').strip()
-            staff.password = request.form.get('password', '').strip()
-            staff.role = request.form.get('role', '').strip()
+            staff.role = request.form.get('role')
+            staff.department_id = request.form.get('department_id')
+
+            user.name = request.form.get('name', '').strip()
+
+            db.session.commit()
+            flash("Zaposleni uspešno posodobljen", "success")
+            return redirect(url_for("main.staff_admin"))
         except Exception as e:
             db.session.rollback()
             flash(f"Napaka pri posodabljanju zaposlenega: {str(e)}", "danger")
     
-    return render_template("update_staff.html", staff=staff, user=current_user)
+    departments = Department.query.all()
+    return render_template("update_staff.html", staff=staff, departments=departments, user=current_user)
 
 # Delete Staff
 @main_bp.route("/delete_staff/<int:staff_id>", methods=["POST"])
@@ -286,6 +333,42 @@ def delete_staff(staff_id):
         db.session.rollback()
         flash(f"Napaka pri brisanju zaposlenega: {str(e)}", "danger")
     return redirect(url_for("main.staff_admin"))
+
+@main_bp.route("/update_patient/<int:patient_id>", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def update_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    user = User.query.get_or_404(patient.user_id)
+    if request.method == "POST":
+        try:
+            patient.gender = request.form.get('gender')
+            patient.address = request.form.get('address')
+
+            user.name = request.form.get('name', '').strip()
+
+            db.session.commit()
+            flash("Pacient uspešno posodobljen", "success")
+            return redirect(url_for("main.patient_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri posodabljanju pacienta: {str(e)}", "danger")
+    
+    return render_template("update_patient.html", patient=patient, user=current_user)
+
+@main_bp.route("/delete_patient/<int:patient_id>", methods=["POST"])
+@login_required
+@roles_required("admin")
+def delete_patient(patient_id):
+    patient = Patient.query.get_or_404(patient_id)
+    try:
+        db.session.delete(patient)
+        db.session.commit()
+        flash("Pacient uspešno izbrisan", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Napaka pri brisanju pacienta: {str(e)}", "danger")
+    return redirect(url_for("main.patient_admin"))
 
 # CRUD Operations for Appointments
 @main_bp.route("/add_appointment", methods=["GET", "POST"])
@@ -322,6 +405,39 @@ def add_appointment():
     patients = Patient.query.join(Patient.user).all()
     return render_template("add_appointment.html", patients=patients, user=current_user)
 
+@main_bp.route("/add_appointment_admin", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def add_appointment_admin():
+    
+    if request.method == "POST":
+        try:
+            patient_id = int(request.form.get('patient_id'))
+            doctor_id = int(request.form.get('staff_id'))
+            appointment_date = datetime.strptime(request.form.get('appointment_date'), '%Y-%m-%d').date()
+            appointment_time = datetime.strptime(request.form.get('appointment_time'), '%H:%M').time()
+            status = request.form.get('status', 'pending')
+            
+            appointment = Appointment(
+                patient_id=patient_id,
+                staff_id=doctor_id,
+                appointment_date=appointment_date,
+                appointment_time=appointment_time,
+                status=status
+            )
+            db.session.add(appointment)
+            db.session.commit()
+            flash("Pregled uspešno dodan", "success")
+            return redirect(url_for("main.appointment_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri dodajanju pregleda: {str(e)}", "danger")
+    
+    
+    patients = Patient.query.join(Patient.user).all()
+    doctors = Staff.query.join(Staff.user).all()
+    return render_template("add_appointment_admin.html", patients=patients, doctors=doctors, user=current_user)
+
 @main_bp.route("/update_appointment/<int:appointment_id>", methods=["GET", "POST"])
 @login_required
 @roles_required("doctor")
@@ -355,20 +471,39 @@ def update_appointment(appointment_id):
     patients = Patient.query.join(Patient.user).all()
     return render_template("update_appointment.html", appointment=appointment, patients=patients, user=current_user)
 
-@main_bp.route("/delete_appointment/<int:appointment_id>", methods=["POST"])
+@main_bp.route("/update_appointment_admin/<int:appointment_id>", methods=["GET", "POST"])
 @login_required
-@roles_required("doctor")
-def delete_appointment(appointment_id):
-    staff = current_user.staff
-    if not staff:
-        return "Error: No staff record found", 404
-    
+@roles_required("admin")
+def update_appointment_admin(appointment_id):
     appointment = Appointment.query.get_or_404(appointment_id)
     
-    # Verify the appointment belongs to this doctor
-    if appointment.staff_id != staff.staff_id:
-        flash("Nimate dostopa do tega pregleda", "danger")
-        return redirect(url_for("main.appointment_doctor"))
+    if request.method == "POST":
+        try:
+            appointment.staff_id = int(request.form.get('doctor_id'))
+            appointment.patient_id = int(request.form.get('patient_id'))
+            appointment.appointment_date = datetime.strptime(request.form.get('appointment_date'), '%Y-%m-%d').date()
+            appointment.appointment_time = datetime.strptime(request.form.get('appointment_time'), '%H:%M').time()
+            appointment.status = request.form.get('status', 'pending')
+            
+            db.session.commit()
+            flash("Pregled uspešno posodobljen", "success")
+            return redirect(url_for("main.appointment_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri posodabljanju pregleda: {str(e)}", "danger")
+    
+    # Get all patients for dropdown
+    patients = Patient.query.join(Patient.user).all()
+    doctors = Staff.query.join(Staff.user).all()
+    return render_template("update_appointment_admin.html", appointment=appointment, patients=patients, doctors=doctors, user=current_user)
+
+@main_bp.route("/delete_appointment/<int:appointment_id>", methods=["POST"])
+@login_required
+@roles_required("doctor", "admin")
+def delete_appointment(appointment_id):
+    staff = current_user.staff
+
+    appointment = Appointment.query.get_or_404(appointment_id)
     
     try:
         db.session.delete(appointment)
@@ -378,17 +513,17 @@ def delete_appointment(appointment_id):
         db.session.rollback()
         flash(f"Napaka pri brisanju pregleda: {str(e)}", "danger")
     
+    if not staff:
+        return redirect(url_for("main.appointment_admin"))
     return redirect(url_for("main.appointment_doctor"))
 
 # CRUD Operations for Diagnoses
 @main_bp.route("/add_diagnosis", methods=["GET", "POST"])
 @login_required
-@roles_required("doctor")
+@roles_required("doctor", "admin")
 def add_diagnosis():
     staff = current_user.staff
-    if not staff:
-        return "Error: No staff record found", 404
-    
+
     if request.method == "POST":
         try:
             appointment_id = int(request.form.get('appointment_id'))
@@ -396,7 +531,7 @@ def add_diagnosis():
             
             # Verify the appointment belongs to this doctor
             appointment = Appointment.query.get_or_404(appointment_id)
-            if appointment.staff_id != staff.staff_id:
+            if staff and appointment.staff_id != staff.staff_id:
                 flash("Nimate dostopa do tega pregleda", "danger")
                 return redirect(url_for("main.add_diagnosis"))
             
@@ -407,28 +542,31 @@ def add_diagnosis():
             db.session.add(diagnosis)
             db.session.commit()
             flash("Diagnoza uspešno dodana", "success")
+            if not staff:
+                return redirect(url_for("main.diagnosis_admin"))
             return redirect(url_for("main.diagnosis_doctor"))
         except Exception as e:
             db.session.rollback()
             flash(f"Napaka pri dodajanju diagnoze: {str(e)}", "danger")
     
     # Get appointments for this doctor
-    appointments = Appointment.query.filter_by(staff_id=staff.staff_id).all()
+    if not staff:
+        appointments = Appointment.query.all()
+    else:
+        appointments = Appointment.query.filter_by(staff_id=staff.staff_id).all()
     return render_template("add_diagnosis.html", appointments=appointments, user=current_user)
 
 @main_bp.route("/update_diagnosis/<int:diagnosis_id>", methods=["GET", "POST"])
 @login_required
-@roles_required("doctor")
+@roles_required("doctor", "admin")
 def update_diagnosis(diagnosis_id):
     staff = current_user.staff
-    if not staff:
-        return "Error: No staff record found", 404
-    
+
     diagnosis = Diagnosis.query.get_or_404(diagnosis_id)
     
     # Verify the diagnosis belongs to an appointment of this doctor
     appointment = Appointment.query.get_or_404(diagnosis.appointment_id)
-    if appointment.staff_id != staff.staff_id:
+    if staff and appointment.staff_id != staff.staff_id:
         flash("Nimate dostopa do te diagnoze", "danger")
         return redirect(url_for("main.diagnosis_doctor"))
     
@@ -438,6 +576,8 @@ def update_diagnosis(diagnosis_id):
             
             db.session.commit()
             flash("Diagnoza uspešno posodobljena", "success")
+            if not staff:
+                return redirect(url_for("main.diagnosis_admin"))
             return redirect(url_for("main.diagnosis_doctor"))
         except Exception as e:
             db.session.rollback()
@@ -447,17 +587,15 @@ def update_diagnosis(diagnosis_id):
 
 @main_bp.route("/delete_diagnosis/<int:diagnosis_id>", methods=["POST"])
 @login_required
-@roles_required("doctor")
+@roles_required("doctor", "admin")
 def delete_diagnosis(diagnosis_id):
     staff = current_user.staff
-    if not staff:
-        return "Error: No staff record found", 404
-    
+
     diagnosis = Diagnosis.query.get_or_404(diagnosis_id)
     
     # Verify the diagnosis belongs to an appointment of this doctor
     appointment = Appointment.query.get_or_404(diagnosis.appointment_id)
-    if appointment.staff_id != staff.staff_id:
+    if staff and appointment.staff_id != staff.staff_id:
         flash("Nimate dostopa do te diagnoze", "danger")
         return redirect(url_for("main.diagnosis_doctor"))
     
@@ -469,13 +607,46 @@ def delete_diagnosis(diagnosis_id):
         db.session.rollback()
         flash(f"Napaka pri brisanju diagnoze: {str(e)}", "danger")
     
+    if not staff:
+        return redirect(url_for("main.diagnosis_admin"))
     return redirect(url_for("main.diagnosis_doctor"))
 
 # CRUD Operations for Admissions
+@main_bp.route("/add_admission", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def add_admission():
+    
+    if request.method == "POST":
+        try:
+            patient_id = int(request.form.get('patient_id'))
+            bed_id = int(request.form.get('bed_id'))
+            admission_date = datetime.strptime(request.form.get('admission_date'), '%Y-%m-%d').date()
+
+            admission = Admission(
+                patient_id=patient_id,
+                bed_id=bed_id,
+                admitted_date=admission_date,
+                discharged_date=None
+            )
+            db.session.add(admission)
+            db.session.commit()
+            flash("Sprejem uspešno dodan", "success")
+            return redirect(url_for("main.admission_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri dodajanju sprejema: {str(e)}", "danger")
+    
+    
+    patients = Patient.query.join(Patient.user).all()
+    beds = Bed.query.join(Bed.room).all()
+    return render_template("add_admission.html", patients=patients, beds=beds, user=current_user)
+
 @main_bp.route("/update_admission/<int:admission_id>", methods=["GET", "POST"])
 @login_required
-@roles_required("doctor")
+@roles_required("doctor", "admin")
 def update_admission(admission_id):
+    staff = current_user.staff
     admission = Admission.query.get_or_404(admission_id)
     
     if request.method == "POST":
@@ -492,6 +663,8 @@ def update_admission(admission_id):
             
             db.session.commit()
             flash("Sprejem uspešno posodobljen", "success")
+            if not staff:
+                return redirect(url_for("main.admission_admin"))
             return redirect(url_for("main.admission_doctor"))
         except Exception as e:
             db.session.rollback()
@@ -1101,6 +1274,73 @@ def room_admin():
         })
     return render_template("room_admin.html", room_rows=room_rows, user=current_user, search=search)
 
+@main_bp.route("/add_room", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def add_room():
+    
+    if request.method == "POST":
+        try:
+            room_type = request.form.get('room_type')
+            department_id = int(request.form.get('department_id'))
+
+            room = Room(
+                type=room_type,
+                department_id=department_id,
+            )
+
+            db.session.add(room)
+            db.session.commit()
+            flash("Soba uspešno dodana", "success")
+            return redirect(url_for("main.room_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri dodajanju sobe: {str(e)}", "danger")
+    
+    
+    departments = Department.query.all()
+    return render_template("add_room.html", departments=departments, user=current_user)
+
+@main_bp.route("/update_room/<int:room_id>", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def update_room(room_id):
+
+    
+    room = Room.query.get_or_404(room_id)
+    
+    if request.method == "POST":
+        try:
+            room.type = request.form.get('room_type')
+            room.department_id = request.form.get('department_id')
+            
+            db.session.commit()
+            flash("Soba uspešno posodobljena", "success")
+            return redirect(url_for("main.room_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri posodabljanju sobe: {str(e)}", "danger")
+    
+    departments = Department.query.all()
+    return render_template("update_room.html", room=room, departments=departments, user=current_user)
+
+@main_bp.route("/delete_room/<int:room_id>", methods=["POST"])
+@login_required
+@roles_required("admin")
+def delete_room(room_id):
+
+    room = Room.query.get_or_404(room_id)
+    
+    try:
+        db.session.delete(room)
+        db.session.commit()
+        flash("Soba uspešno izbrisana", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Napaka pri brisanju sobe: {str(e)}", "danger")
+    
+    return redirect(url_for("main.room_admin"))
+
 # View all beds
 @main_bp.route("/bed_admin")
 @login_required
@@ -1133,6 +1373,71 @@ def bed_admin():
         })
     return render_template("bed_admin.html", bed_rows=bed_rows, user=current_user, search=search)
 
+@main_bp.route("/add_bed", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def add_bed():
+    
+    if request.method == "POST":
+        try:
+            room_id = request.form.get('room_id')
+            status = request.form.get('bed_status')
+
+            bed = Bed(
+                room_id=room_id,
+                status=status,
+            )
+
+            db.session.add(bed)
+            db.session.commit()
+            flash("Postleja uspešno dodana", "success")
+            return redirect(url_for("main.bed_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri dodajanju postelje: {str(e)}", "danger")
+    
+    
+    rooms = Room.query.join(Department).all()
+    return render_template("add_bed.html", rooms=rooms, user=current_user)
 
 
+@main_bp.route("/update_bed/<int:bed_id>", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def update_bed(bed_id):
+
+    
+    bed = Bed.query.get_or_404(bed_id)
+    
+    if request.method == "POST":
+        try:
+            bed.room_id = request.form.get('room_id')
+            bed.status = request.form.get('bed_status')
+            
+            db.session.commit()
+            flash("Postelja uspešno posodobljena", "success")
+            return redirect(url_for("main.bed_admin"))
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Napaka pri posodabljanju postelje: {str(e)}", "danger")
+    
+    rooms = Room.query.join(Department).all()
+    return render_template("update_bed.html", bed=bed, rooms=rooms, user=current_user)
+
+@main_bp.route("/delete_bed/<int:bed_id>", methods=["POST"])
+@login_required
+@roles_required("admin")
+def delete_bed(bed_id):
+
+    bed = Bed.query.get_or_404(bed_id)
+    
+    try:
+        db.session.delete(bed)
+        db.session.commit()
+        flash("Postelja uspešno izbrisana", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Napaka pri brisanju postelje: {str(e)}", "danger")
+    
+    return redirect(url_for("main.bed_admin"))
 

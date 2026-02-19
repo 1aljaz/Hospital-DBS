@@ -64,7 +64,9 @@
                             <td>{{ row.department_name }}</td>
                             <td>
                                 <a href="/update_room/{{ row.room_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_room/{{ row.room_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                                <form action="{{ url_for('main.delete_room', room_id=row.room_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545; margin-left: 5px;" onclick="return confirm('Ali ste prepričani, da želite izbrisati to sobo?');">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}

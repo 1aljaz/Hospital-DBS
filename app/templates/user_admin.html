@@ -66,7 +66,9 @@
                             <td>{{ row.role }}</td>
                             <td>
                                 <a href="/update_user/{{ row.user_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_user/{{ row.user_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                                <form action="{{ url_for('main.delete_user', user_id=row.user_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545; margin-left: 5px;" onclick="return confirm('Ali ste prepričani, da želite izbrisati tega uporabnika?');">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}
