@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-# Import your Flask app instance (adjust this to your factory function if necessary)
+
 from run import app 
 
 def clean_html(raw_html):
@@ -15,16 +15,16 @@ def clean_html(raw_html):
 def admin_department_crud(client):
     while True:
         print("\n--- [Admin] Department CRUD ---")
-        print("1. Create Department")
-        print("2. Read / View Departments Dashboard")
-        print("3. Update Department")
-        print("4. Delete Department")
-        print("0. Back to Admin Menu")
-        choice = input("Select operation: ")
+        print("1. Ustvari oddelek")
+        print("2. Poglej oddelek")
+        print("3. Updataj oddelek")
+        print("4. Izbriši oddelek")
+        print("0. Nazaj na admin meni")
+        choice = input("Izberi: ")
 
         if choice == '1':
-            name = input("Enter Department Name: ").strip()
-            location = input("Enter Department Location: ").strip()
+            name = input("Vnesi ime oddelka: ").strip()
+            location = input("Vnesi lokacijo oddelka: ").strip()
             res = client.post('/add_department', data={'name': name, 'location': location}, follow_redirects=True)
             print("\n[Server Response]:")
             print(clean_html(res.data)[:300] + "...")
@@ -32,16 +32,16 @@ def admin_department_crud(client):
             res = client.get('/department_admin')
             print("\n" + clean_html(res.data))
         elif choice == '3':
-            dept_id = input("Enter Department ID to update: ").strip()
-            name = input("Enter New Department Name: ").strip()
-            location = input("Enter New Department Location: ").strip()
+            dept_id = input("Izberi ID oddelka za pospodobitev: ").strip()
+            name = input("Vnesi novo ime oddelka: ").strip()
+            location = input("Vnesi novo lokacijo oddelka: ").strip()
             res = client.post(f'/update_department/{dept_id}', data={
                 'department_name': name,
                 'department_location': location
             }, follow_redirects=True)
             print("\n[Server Response]: Update requested.")
         elif choice == '4':
-            dept_id = input("Enter Department ID to delete: ").strip()
+            dept_id = input("Vnesi ID oddelka za izbris: ").strip()
             res = client.post(f'/delete_department/{dept_id}', follow_redirects=True)
             print("\n[Server Response]: Deletion requested.")
         elif choice == '0':
@@ -50,18 +50,18 @@ def admin_department_crud(client):
 def admin_staff_crud(client):
     while True:
         print("\n--- [Admin] Staff CRUD ---")
-        print("1. Create Staff Member")
-        print("2. Read / View Staff Dashboard")
-        print("3. Update Staff Member")
-        print("4. Delete Staff Member")
-        print("0. Back to Admin Menu")
-        choice = input("Select operation: ")
+        print("1. Dodaj zaposlenega")
+        print("2. Preglej zaposlene")
+        print("3. Pospodobi zaposlene")
+        print("4. Izbriši zaposlene")
+        print("0. Nazaj k meniuju za admina")
+        choice = input("Izberi: ")
 
         if choice == '1':
-            name = input("Full Name: ").strip()
-            username = input("Username: ").strip()
-            password = input("Password: ").strip()
-            role = input("Role (doctor/admin/patient): ").strip()
+            name = input("Ime in priimek: ").strip()
+            username = input("Uporabniško ime: ").strip()
+            password = input("Geslo: ").strip()
+            role = input("Vloga (doctor/admin/patient): ").strip()
             res = client.post('/add_staff', data={
                 'name': name,
                 'username': username,
@@ -74,10 +74,10 @@ def admin_staff_crud(client):
             res = client.get('/staff_admin')
             print("\n" + clean_html(res.data))
         elif choice == '3':
-            staff_id = input("Enter Staff ID to update: ").strip()
-            name = input("Enter New Full Name: ").strip()
-            role = input("Enter New Role (doctor/admin): ").strip()
-            dept_id = input("Enter Department ID: ").strip()
+            staff_id = input("Vnesi ID zaposlenega za update: ").strip()
+            name = input("Vnesi polno ime zaposlenega: ").strip()
+            role = input("Vnesi novo vlogo (doctor/admin): ").strip()
+            dept_id = input("Vnesi ID oddelka: ").strip()
             res = client.post(f'/update_staff/{staff_id}', data={
                 'name': name,
                 'role': role,
@@ -97,10 +97,10 @@ def admin_staff_crud(client):
 def admin_menu(client):
     while True:
         print("\n=== ADMIN DASHBOARD ===")
-        print("1. Manage Departments (Category 1 CRUD)")
-        print("2. Manage Staff (Category 2 CRUD)")
+        print("1. Uredi oddelke")
+        print("2. Uredi zaposlene")
         print("0. Logout & Exit")
-        choice = input("Select an option: ")
+        choice = input("Izberi: ")
         if choice == '1':
             admin_department_crud(client)
         elif choice == '2':
@@ -111,19 +111,20 @@ def admin_menu(client):
 def doctor_menu(client):
     while True:
         print("\n=== DOCTOR DASHBOARD ===")
-        print("1. View My Scheduled Appointments (Read)")
-        print("2. Update an Appointment (Update)")
+        print("1. Oglej si napovedane preglede")
+        print("2. Popravi pregled")
+        print("3. Dodaj pregled")
         print("0. Logout & Exit")
-        choice = input("Select an option: ")
+        choice = input("Izberi: ")
         
         if choice == '1':
             res = client.get('/appointment_doctor')
             print("\n" + clean_html(res.data))
         elif choice == '2':
-            apt_id = input("Enter Appointment ID to update: ").strip()
-            p_id = input("Patient ID: ").strip()
-            date = input("Appointment Date (YYYY-MM-DD): ").strip()
-            time = input("Appointment Time (HH:MM): ").strip()
+            apt_id = input("Vnesi ID pregleda za pospodobitev: ").strip()
+            p_id = input("Pacientov ID: ").strip()
+            date = input("Datum pregleda (YYYY-MM-DD): ").strip()
+            time = input("Čas pregleda (HH:MM): ").strip()
             status = input("Status (pending/completed/cancelled): ").strip()
             
             res = client.post(f'/update_appointment/{apt_id}', data={
@@ -133,15 +134,29 @@ def doctor_menu(client):
                 'status': status
             }, follow_redirects=True)
             print("\n[Server Response]: Appointment updated.")
+        elif choice == '3':
+            p_id = input("Pacientov ID: ").strip()
+            date = input("Datum pregleda (YYYY-MM-DD): ").strip()
+            time = input("Čas pregleda (HH:MM): ").strip()
+            status = input("Status (pending/completed/cancelled): ").strip()
+            
+            res = client.post(f'/add_appointment', data={
+                'patient_id': p_id,
+                'appointment_date': date,
+                'appointment_time': time,
+                'status': status
+            }, follow_redirects=True)
+            print("\n[Server Response]: Appointment added.")
+            print(clean_html(res.data)[:300] + "...")
         elif choice == '0':
             break
 
 def patient_menu(client):
     while True:
         print("\n=== PATIENT DASHBOARD ===")
-        print("1. View My Appointments (Read)")
+        print("1. Poglej svoje preglede")
         print("0. Logout & Exit")
-        choice = input("Select an option: ")
+        choice = input("Izberi: ")
         
         if choice == '1':
             res = client.get('/appointment_patient')
@@ -150,14 +165,14 @@ def patient_menu(client):
             break
 
 # ==========================================
-# MAIN EXECUTION & AUTOMATIC ROLE CHECK
+# MAIN EXECUTION 
 # ==========================================
 def run_terminal_interface():
     # Context-managed browser session
     with app.test_client() as client:
         print("=== Hospital Database System CLI ===")
-        username = input("Username: ").strip()
-        password = input("Password: ").strip()
+        username = input("Uporabniško ime: ").strip()
+        password = input("Geslo: ").strip()
 
         # Hits your auth route directly
         login_response = client.post('/auth/', data={
