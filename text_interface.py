@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+
 
 from run import app 
 
@@ -9,9 +9,7 @@ def clean_html(raw_html):
     clean_text = re.sub('<.*?>', ' ', text)
     return "\n".join([line.strip() for line in clean_text.splitlines() if line.strip()])
 
-# ==========================================
-# ADMIN SUB-MENUS (CRUD for 2 Categories)
-# ==========================================
+#pod meni za admina (departementi)
 def admin_department_crud(client):
     while True:
         print("\n--- [Admin] Department CRUD ---")
@@ -47,6 +45,7 @@ def admin_department_crud(client):
         elif choice == '0':
             break
 
+#podmeni za admina staff
 def admin_staff_crud(client):
     while True:
         print("\n--- [Admin] Staff CRUD ---")
@@ -91,9 +90,8 @@ def admin_staff_crud(client):
         elif choice == '0':
             break
 
-# ==========================================
-# ROLE MAIN MENUS
-# ==========================================
+# meniji po vlogah
+
 def admin_menu(client):
     while True:
         print("\n=== ADMIN DASHBOARD ===")
@@ -163,29 +161,26 @@ def patient_menu(client):
             print("\n" + clean_html(res.data))
         elif choice == '0':
             break
-
-# ==========================================
-# MAIN EXECUTION 
-# ==========================================
+# glavni del
 def run_terminal_interface():
-    # Context-managed browser session
+    
     with app.test_client() as client:
         print("=== Hospital Database System CLI ===")
         username = input("Uporabniško ime: ").strip()
         password = input("Geslo: ").strip()
 
-        # Hits your auth route directly
+        
         login_response = client.post('/auth/', data={
             'username': username,
             'password': password
         }, follow_redirects=True)
 
-        # Catch authentication validation errors matching auth.py flash messages
+        
         if b"Invalid username" in login_response.data:
             print("\n[ERROR] Login failed: Invalid username or password.")
             return
 
-        # AUTOMATIC ROLE DETECTION FROM REDIRECT DESTINATION
+        
         final_path = login_response.request.path
         print(f"\n[SUCCESS] Authentication verified. Server routed context to: {final_path}")
 
