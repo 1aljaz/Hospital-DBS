@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash
 
 main_bp = Blueprint("main", __name__)
 
+
+#za dobit html
 @main_bp.route("/")
 def index():
     return render_template("index.html", user=current_user)
@@ -41,38 +43,38 @@ def patient_dashboard():
 @login_required
 @roles_required("doctor")
 def appointment_doctor():
-    # Get the staff_id for the current doctor
+    # Dobiš staff id od zdravnika
     staff = current_user.staff
     if not staff:
         return "Error: No staff record found", 404
     
     staff_id = staff.staff_id
     
-    # Get search and filter parameters
+    # Dobiš parametre za search pa filter
     search = request.args.get('search', '').strip()
     status_filter = request.args.get('status', '').strip()
     
-    # Query appointments for this doctor
+    # query appointmentovza tega zdravnika 
     query = Appointment.query.filter_by(staff_id=staff_id)
     
-    # Apply search filter (by patient name or ID)
+    # searchaj
     if search:
         try:
-            # Try to search by patient ID
+            #po id
             patient_id = int(search)
             query = query.filter_by(patient_id=patient_id)
         except ValueError:
-            # Search by patient name (via User relationship)
+            #po imenu
             from app.models.user import User
             query = query.join(Patient).join(User).filter(User.name.ilike(f'%{search}%'))
     
-    # Apply status filter
+    # uporabi filter za status
     if status_filter:
         query = query.filter_by(status=status_filter)
     
     appointments = query.order_by(Appointment.appointment_date.desc(), Appointment.appointment_time.desc()).all()
     
-    # Prepare data for template
+    # priprava podatkov
     data_rows = []
     for apt in appointments:
         patient = Patient.query.get(apt.patient_id)
@@ -94,16 +96,12 @@ def appointment_doctor():
 @login_required
 @roles_required("doctor")
 def admission_doctor():
-    # Get search parameter
+    # param za search
     search = request.args.get('search', '').strip()
-    
-    # Query all admissions
     query = Admission.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by patient ID or bed ID
             search_id = int(search)
             query = query.filter(
                 (Admission.patient_id == search_id) | (Admission.bed_id == search_id)
@@ -115,7 +113,7 @@ def admission_doctor():
     
     admissions = query.order_by(Admission.admitted_date.desc()).all()
     
-    # Prepare data for template
+    # pripravi podatke za template
     admission_rows = []
     for adm in admissions:
         patient = Patient.query.get(adm.patient_id)
@@ -144,32 +142,25 @@ def admission_doctor():
 @login_required
 @roles_required("doctor")
 def diagnosis_doctor():
-    # Get the staff_id for the current doctor
     staff = current_user.staff
     if not staff:
         return "Error: No staff record found", 404
-    
     staff_id = staff.staff_id
     
-    # Get search parameter
     search = request.args.get('search', '').strip()
     
-    # Query diagnoses for appointments belonging to this doctor
     query = Diagnosis.query.join(Appointment).filter(Appointment.staff_id == staff_id)
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by appointment ID
             appointment_id = int(search)
             query = query.filter(Diagnosis.appointment_id == appointment_id)
         except ValueError:
-            # Search by description
+            # Searchaj po descriptionu
             query = query.filter(Diagnosis.description.ilike(f'%{search}%'))
     
     diagnoses = query.order_by(Diagnosis.diagnosis_id.desc()).all()
-    
-    # Prepare data for template
+
     diagnosis_rows = []
     for diag in diagnoses:
         diagnosis_rows.append({
@@ -177,10 +168,9 @@ def diagnosis_doctor():
             'appointment_id': diag.appointment_id,
             'description': diag.description
         })
-    
     return render_template("diagnosis_doctor.html", diagnosis_rows=diagnosis_rows, user=current_user)
 
-# CRUD Operations for Departments
+# CRUD za Departmente
 @main_bp.route("/add_department", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -246,8 +236,8 @@ def delete_department(department_id):
     return redirect(url_for("main.department_admin"))
 
 
-# CRUD Operations for Staff
-# Add Staff
+# CRUD Operations za Staff
+# Dodaj stafd
 @main_bp.route("/add_staff", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -263,7 +253,7 @@ def add_staff():
                 flash("Vsa obvezna polja morajo biti izpolnjena", "danger")
                 return render_template("add_staff.html", user=current_user)
             
-            # Check if username already exists
+            # if username obstaja
             if User.query.filter_by(username=username).first():
                 flash("Uporabniško ime že obstaja", "danger")
                 return render_template("add_staff.html", user=current_user)
@@ -281,7 +271,7 @@ def add_staff():
             db.session.commit()
 
             if role == RoleEnum.DOCTOR:
-                # Doctor needs department - we'll set it to first department or None
+                # Doctor mora met depart.
                 dept = Department.query.first()
                 staff = Staff(user_id=new_user.user_id, role="doctor", department_id=dept.department_id if dept else None)
                 db.session.add(staff)
@@ -370,7 +360,7 @@ def delete_patient(patient_id):
         flash(f"Napaka pri brisanju pacienta: {str(e)}", "danger")
     return redirect(url_for("main.patient_admin"))
 
-# CRUD Operations for Appointments
+# CRUD Operations za Appointmente
 @main_bp.route("/add_appointment", methods=["GET", "POST"])
 @login_required
 @roles_required("doctor")
@@ -401,7 +391,7 @@ def add_appointment():
             db.session.rollback()
             flash(f"Napaka pri dodajanju pregleda: {str(e)}", "danger")
     
-    # Get all patients for dropdown
+    # pacienti za dropdown
     patients = Patient.query.join(Patient.user).all()
     return render_template("add_appointment.html", patients=patients, user=current_user)
 
@@ -448,7 +438,7 @@ def update_appointment(appointment_id):
     
     appointment = Appointment.query.get_or_404(appointment_id)
     
-    # Verify the appointment belongs to this doctor
+    # preveri če je app. od tega doktorja
     if appointment.staff_id != staff.staff_id:
         flash("Nimate dostopa do tega pregleda", "danger")
         return redirect(url_for("main.appointment_doctor"))
@@ -467,7 +457,6 @@ def update_appointment(appointment_id):
             db.session.rollback()
             flash(f"Napaka pri posodabljanju pregleda: {str(e)}", "danger")
     
-    # Get all patients for dropdown
     patients = Patient.query.join(Patient.user).all()
     return render_template("update_appointment.html", appointment=appointment, patients=patients, user=current_user)
 
@@ -492,7 +481,7 @@ def update_appointment_admin(appointment_id):
             db.session.rollback()
             flash(f"Napaka pri posodabljanju pregleda: {str(e)}", "danger")
     
-    # Get all patients for dropdown
+    # pacienti za dropdown
     patients = Patient.query.join(Patient.user).all()
     doctors = Staff.query.join(Staff.user).all()
     return render_template("update_appointment_admin.html", appointment=appointment, patients=patients, doctors=doctors, user=current_user)
@@ -517,7 +506,7 @@ def delete_appointment(appointment_id):
         return redirect(url_for("main.appointment_admin"))
     return redirect(url_for("main.appointment_doctor"))
 
-# CRUD Operations for Diagnoses
+# CRUD za Diagnoze
 @main_bp.route("/add_diagnosis", methods=["GET", "POST"])
 @login_required
 @roles_required("doctor", "admin")
@@ -529,7 +518,6 @@ def add_diagnosis():
             appointment_id = int(request.form.get('appointment_id'))
             description = request.form.get('description', '').strip()
             
-            # Verify the appointment belongs to this doctor
             appointment = Appointment.query.get_or_404(appointment_id)
             if staff and appointment.staff_id != staff.staff_id:
                 flash("Nimate dostopa do tega pregleda", "danger")
@@ -549,7 +537,6 @@ def add_diagnosis():
             db.session.rollback()
             flash(f"Napaka pri dodajanju diagnoze: {str(e)}", "danger")
     
-    # Get appointments for this doctor
     if not staff:
         appointments = Appointment.query.all()
     else:
@@ -564,7 +551,6 @@ def update_diagnosis(diagnosis_id):
 
     diagnosis = Diagnosis.query.get_or_404(diagnosis_id)
     
-    # Verify the diagnosis belongs to an appointment of this doctor
     appointment = Appointment.query.get_or_404(diagnosis.appointment_id)
     if staff and appointment.staff_id != staff.staff_id:
         flash("Nimate dostopa do te diagnoze", "danger")
@@ -592,8 +578,7 @@ def delete_diagnosis(diagnosis_id):
     staff = current_user.staff
 
     diagnosis = Diagnosis.query.get_or_404(diagnosis_id)
-    
-    # Verify the diagnosis belongs to an appointment of this doctor
+
     appointment = Appointment.query.get_or_404(diagnosis.appointment_id)
     if staff and appointment.staff_id != staff.staff_id:
         flash("Nimate dostopa do te diagnoze", "danger")
@@ -611,7 +596,7 @@ def delete_diagnosis(diagnosis_id):
         return redirect(url_for("main.diagnosis_admin"))
     return redirect(url_for("main.diagnosis_doctor"))
 
-# CRUD Operations for Admissions
+# CRUD za admissone
 @main_bp.route("/add_admission", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -670,34 +655,28 @@ def update_admission(admission_id):
             db.session.rollback()
             flash(f"Napaka pri posodabljanju sprejema: {str(e)}", "danger")
     
-    # Get all patients and beds for dropdowns
     patients = Patient.query.join(Patient.user).all()
     beds = Bed.query.all()
     return render_template("update_admission.html", admission=admission, patients=patients, beds=beds, user=current_user)
 
-# Patient routes
+# Pacient routi
 @main_bp.route("/appointment_patient")
 @login_required
 @roles_required("patient")
 def appointment_patient():
-    # Get the patient_id for the current patient
     patient = current_user.patient
     if not patient:
         return "Error: No patient record found", 404
     
     patient_id = patient.patient_id
     
-    # Get search and filter parameters
     search = request.args.get('search', '').strip()
     status_filter = request.args.get('status', '').strip()
     
-    # Query appointments for this patient only
     query = Appointment.query.filter_by(patient_id=patient_id)
     
-    # Apply search filter (by staff/doctor name or date)
     if search:
         try:
-            # Try to search by staff ID
             staff_id = int(search)
             query = query.filter_by(staff_id=staff_id)
         except ValueError:
@@ -705,13 +684,11 @@ def appointment_patient():
             from app.models.user import User
             query = query.join(Staff).join(User).filter(User.name.ilike(f'%{search}%'))
     
-    # Apply status filter
     if status_filter:
         query = query.filter_by(status=status_filter)
     
     appointments = query.order_by(Appointment.appointment_date.desc(), Appointment.appointment_time.desc()).all()
-    
-    # Prepare data for template
+
     data_rows = []
     for apt in appointments:
         data_rows.append({
@@ -728,26 +705,21 @@ def appointment_patient():
 @login_required
 @roles_required("patient")
 def diagnosis_patient():
-    # Get the patient_id for the current patient
     patient = current_user.patient
     if not patient:
         return "Error: No patient record found", 404
     
     patient_id = patient.patient_id
     
-    # Get search parameter
     search = request.args.get('search', '').strip()
     
-    # Query diagnoses for appointments belonging to this patient
     query = Diagnosis.query.join(Appointment).filter(Appointment.patient_id == patient_id)
     
-    # Apply search filter
     if search:
         query = query.filter(Diagnosis.description.ilike(f'%{search}%'))
     
     diagnoses = query.order_by(Diagnosis.diagnosis_id.desc()).all()
-    
-    # Prepare data for template
+
     diagnosis_rows = []
     for diag in diagnoses:
         diagnosis_rows.append({
@@ -762,20 +734,16 @@ def diagnosis_patient():
 @login_required
 @roles_required("patient")
 def admission_patient():
-    # Get the patient_id for the current patient
     patient = current_user.patient
     if not patient:
         return "Error: No patient record found", 404
     
     patient_id = patient.patient_id
     
-    # Get search parameter
     search = request.args.get('search', '').strip()
     
-    # Query admissions for this patient only
     query = Admission.query.filter_by(patient_id=patient_id)
     
-    # Apply search filter (by bed ID)
     if search:
         try:
             bed_id = int(search)
@@ -785,7 +753,6 @@ def admission_patient():
     
     admissions = query.order_by(Admission.admitted_date.desc()).all()
     
-    # Prepare data for template
     admission_rows = []
     for adm in admissions:
         bed = Bed.query.get(adm.bed_id)
@@ -803,25 +770,21 @@ def admission_patient():
     
     return render_template("admission_patient.html", admission_rows=admission_rows, user=current_user)
 
-# ==================== ADMIN ROUTES ====================
+# routi za admina
 
-# Admin Dashboard - View all users
+# Admin Dashboard
 @main_bp.route("/user_admin")
 @login_required
 @roles_required("admin")
 def user_admin():
     search = request.args.get('search', '').strip()
-    
     query = User.query
-    
-    # Apply search filter
+
     if search:
         try:
-            # Try to search by user ID
             user_id = int(search)
             query = query.filter(User.user_id == user_id)
         except ValueError:
-            # Search by name or username
             query = query.filter(
                 (User.name.ilike(f'%{search}%')) |
                 (User.username.ilike(f'%{search}%'))
@@ -856,7 +819,6 @@ def add_user():
                 flash("Vsa obvezna polja morajo biti izpolnjena", "danger")
                 return render_template("add_user.html", user=current_user)
             
-            # Check if username already exists
             if User.query.filter_by(username=username).first():
                 flash("Uporabniško ime že obstaja", "danger")
                 return render_template("add_user.html", user=current_user)
@@ -874,13 +836,11 @@ def add_user():
             db.session.add(new_user)
             db.session.commit()
             
-            # If patient or doctor, create corresponding record
             if role == RoleEnum.PATIENT:
                 patient = Patient(user_id=new_user.user_id, gender=None, address=None)
                 db.session.add(patient)
                 db.session.commit()
             elif role == RoleEnum.DOCTOR:
-                # Doctor needs department - we'll set it to first department or None
                 dept = Department.query.first()
                 staff = Staff(user_id=new_user.user_id, role="doctor", department_id=dept.department_id if dept else None)
                 db.session.add(staff)
@@ -894,7 +854,6 @@ def add_user():
     
     return render_template("add_user.html", user=current_user)
 
-# Add Patient
 @main_bp.route("/add_patient", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -910,7 +869,6 @@ def add_patient():
                 flash("Vsa obvezna polja morajo biti izpolnjena", "danger")
                 return render_template("add_patient.html", user=current_user)
             
-            # Check if username already exists
             if User.query.filter_by(username=username).first():
                 flash("Uporabniško ime že obstaja", "danger")
                 return render_template("add_patient.html", user=current_user)
@@ -954,7 +912,6 @@ def update_user(user_id):
             phone = request.form.get('phone', '').strip()
             role_str = request.form.get('role', '').strip()
             
-            # Check if username is taken by another user
             existing_user = User.query.filter_by(username=user.username).first()
             if existing_user and existing_user.user_id != user_id:
                 flash("Uporabniško ime že obstaja", "danger")
@@ -963,7 +920,6 @@ def update_user(user_id):
             user.phone = phone if phone else None
             user.role = RoleEnum[role_str.upper()]
             
-            # Update password if provided
             new_password = request.form.get('password', '').strip()
             if new_password:
                 user.password_hash = generate_password_hash(new_password)
@@ -1008,14 +964,11 @@ def patient_admin():
     
     query = Patient.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by patient ID
             patient_id = int(search)
             query = query.filter(Patient.patient_id == patient_id)
         except ValueError:
-            # Search by patient name
             from app.models.user import User
             query = query.join(User).filter(User.name.ilike(f'%{search}%'))
     
@@ -1031,7 +984,7 @@ def patient_admin():
         })
     return render_template("patient_admin.html", patient_rows=patient_rows, user=current_user, search=search)
 
-# View all staff
+# poglej ves staff
 @main_bp.route("/staff_admin")
 @login_required
 @roles_required("admin")
@@ -1040,14 +993,11 @@ def staff_admin():
     
     query = Staff.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by staff ID
             staff_id = int(search)
             query = query.filter(Staff.staff_id == staff_id)
         except ValueError:
-            # Search by staff name or department
             from app.models.user import User
             from sqlalchemy import or_
             query = query.join(User, Staff.user_id == User.user_id).outerjoin(
@@ -1081,10 +1031,8 @@ def appointment_admin():
     
     query = Appointment.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by appointment ID
             appointment_id = int(search)
             query = query.filter(Appointment.appointment_id == appointment_id)
         except ValueError:
@@ -1133,13 +1081,10 @@ def appointment_admin():
 @roles_required("admin")
 def admission_admin():
     search = request.args.get('search', '').strip()
-    
     query = Admission.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by admission ID, patient ID, or bed ID
             search_id = int(search)
             query = query.filter(
                 (Admission.admission_id == search_id) |
@@ -1147,7 +1092,6 @@ def admission_admin():
                 (Admission.bed_id == search_id)
             )
         except ValueError:
-            # Search by patient name
             from app.models.user import User
             query = query.join(Patient).join(User).filter(User.name.ilike(f'%{search}%'))
     
@@ -1182,17 +1126,14 @@ def diagnosis_admin():
     
     query = Diagnosis.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by diagnosis ID or appointment ID
             search_id = int(search)
             query = query.filter(
                 (Diagnosis.diagnosis_id == search_id) |
                 (Diagnosis.appointment_id == search_id)
             )
         except ValueError:
-            # Search by description
             query = query.filter(Diagnosis.description.ilike(f'%{search}%'))
     
     diagnoses = query.order_by(Diagnosis.diagnosis_id.desc()).all()
@@ -1214,14 +1155,11 @@ def department_admin():
     
     query = Department.query
     
-    # Apply search filter
     if search:
         try:
-            # Try to search by department ID
             dept_id = int(search)
             query = query.filter(Department.department_id == dept_id)
         except ValueError:
-            # Search by name or location
             query = query.filter(
                 (Department.name.ilike(f'%{search}%')) |
                 (Department.location.ilike(f'%{search}%'))
@@ -1274,6 +1212,8 @@ def room_admin():
         })
     return render_template("room_admin.html", room_rows=room_rows, user=current_user, search=search)
 
+
+#Dodaj sobo
 @main_bp.route("/add_room", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -1301,6 +1241,7 @@ def add_room():
     departments = Department.query.all()
     return render_template("add_room.html", departments=departments, user=current_user)
 
+#updataj sobo
 @main_bp.route("/update_room/<int:room_id>", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -1324,6 +1265,7 @@ def update_room(room_id):
     departments = Department.query.all()
     return render_template("update_room.html", room=room, departments=departments, user=current_user)
 
+#zbriši sobo
 @main_bp.route("/delete_room/<int:room_id>", methods=["POST"])
 @login_required
 @roles_required("admin")
@@ -1340,6 +1282,7 @@ def delete_room(room_id):
         flash(f"Napaka pri brisanju sobe: {str(e)}", "danger")
     
     return redirect(url_for("main.room_admin"))
+
 
 # View all beds
 @main_bp.route("/bed_admin")
@@ -1373,6 +1316,7 @@ def bed_admin():
         })
     return render_template("bed_admin.html", bed_rows=bed_rows, user=current_user, search=search)
 
+#dodaj posteljo
 @main_bp.route("/add_bed", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -1396,11 +1340,11 @@ def add_bed():
             db.session.rollback()
             flash(f"Napaka pri dodajanju postelje: {str(e)}", "danger")
     
-    
     rooms = Room.query.join(Department).all()
     return render_template("add_bed.html", rooms=rooms, user=current_user)
 
 
+#udpataj posteljo
 @main_bp.route("/update_bed/<int:bed_id>", methods=["GET", "POST"])
 @login_required
 @roles_required("admin")
@@ -1424,6 +1368,7 @@ def update_bed(bed_id):
     rooms = Room.query.join(Department).all()
     return render_template("update_bed.html", bed=bed, rooms=rooms, user=current_user)
 
+#izbriši posteljo
 @main_bp.route("/delete_bed/<int:bed_id>", methods=["POST"])
 @login_required
 @roles_required("admin")
