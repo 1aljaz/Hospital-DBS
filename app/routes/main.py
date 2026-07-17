@@ -749,7 +749,7 @@ def admission_patient():
             bed_id = int(search)
             query = query.filter_by(bed_id=bed_id)
         except ValueError:
-            pass  # If not a number, ignore search
+            pass 
     
     admissions = query.order_by(Admission.admitted_date.desc()).all()
     

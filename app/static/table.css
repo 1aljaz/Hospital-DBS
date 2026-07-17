@@ -7,7 +7,7 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* Search and Filter Bar Styling */
+/* Search and Filter Bar */
 .table-controls {
     margin-bottom: 20px;
 }
@@ -44,7 +44,7 @@
 
 /* Table Styling */
 .table-wrapper {
-    overflow-x: auto; /* Makes table scrollable on small screens */
+    overflow-x: auto; 
 }
 
 table {

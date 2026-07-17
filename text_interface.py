@@ -12,7 +12,7 @@ def clean_html(raw_html):
 #pod meni za admina (departementi)
 def admin_department_crud(client):
     while True:
-        print("\n--- [Admin] Department CRUD ---")
+        print("\n--- [Admin] Department ---")
         print("1. Ustvari oddelek")
         print("2. Poglej oddelek")
         print("3. Updataj oddelek")
@@ -48,7 +48,7 @@ def admin_department_crud(client):
 #podmeni za admina staff
 def admin_staff_crud(client):
     while True:
-        print("\n--- [Admin] Staff CRUD ---")
+        print("\n--- [Admin] Staff ---")
         print("1. Dodaj zaposlenega")
         print("2. Preglej zaposlene")
         print("3. Pospodobi zaposlene")

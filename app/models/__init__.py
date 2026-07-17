@@ -10,7 +10,6 @@ from .appointment import Appointment
 from .admission import Admission
 from .diagnosis import Diagnosis
 
-# Optional: expose all models as a list (useful for migrations)
 all_models = [
     User,
     Patient,

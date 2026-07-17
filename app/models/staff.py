@@ -6,7 +6,7 @@ class Staff(db.Model):
 
     staff_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), unique=True)
-    role = db.Column(db.String)  # e.g., "doctor" or "admin"
+    role = db.Column(db.String)  # recimo "doctor" ali "admin"
     department_id = db.Column(db.Integer, db.ForeignKey("departments.department_id"))
 
     # Relationships

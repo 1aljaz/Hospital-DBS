@@ -4,7 +4,7 @@ body {
     margin: 0;
 }
 
-/* Login page centering - only when there's no navbar */
+
 body:not(.has-navbar) {
     display: flex;
     justify-content: center;
