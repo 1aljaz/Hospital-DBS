@@ -2,6 +2,8 @@ from app import create_app
 from app.db import db
 from app.factories import (
     create_admin,
+    create_doctor,
+    create_patient,
     create_departments_and_staff,
     create_patients,
     create_rooms_and_beds,
