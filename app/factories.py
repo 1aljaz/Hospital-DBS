@@ -22,6 +22,7 @@ def random_gender():
     return random.choice(["Male", "Female", "Other"])
 
 
+#Ustvarjanje posameznih primerkov za ogled strani
 def create_admin():
     """Create admin user with username 'admin' and password 'root'"""
     # Check if admin already exists
@@ -42,6 +43,47 @@ def create_admin():
     print("Admin user created: username='admin', password='root'")
     return admin_user
 
+def create_doctor():
+    """Create doctor user with username 'doctor' and password 'doctor'"""
+    # Check if doctor already exists
+    existing_doctor = User.query.filter_by(username="doctor").first()
+    if existing_doctor:
+        print("Doctor user already exists, skipping creation.")
+        return existing_doctor
+    
+    doctor_user = User(
+        name="Doctor",
+        username="doctor",
+        password_hash=generate_password_hash("doctor"),
+        role=RoleEnum.DOCTOR,
+        phone=None
+    )
+    db.session.add(doctor_user)
+    db.session.commit()
+    print("Doctor user created: username='doctor', password='doctor'")
+    return doctor_user
+
+
+def create_patient():
+    """Create patient user with username 'patient' and password 'patient'"""
+    # Check if patient already exists
+    existing_patient = User.query.filter_by(username="patient").first()
+    if existing_patient:
+        print("Patient user already exists, skipping creation.")
+        return existing_patient
+    
+    patient_user = User(
+        name="Patient",
+        username="patient",
+        password_hash=generate_password_hash("patient"),
+        role=RoleEnum.PATIENT,
+        phone=None
+    )
+    db.session.add(patient_user)
+    db.session.commit()
+    print("Patient user created: username='patient', password='patient'")
+    return patient_user
+#konec posameznih
 
 def create_departments_and_staff(num_departments=3, num_doctors_per_dept=3):
     departments = []
