@@ -17,6 +17,10 @@ app = create_app()
 with app.app_context():
     print("Creating admin user...")
     admin = create_admin()
+    print("Creating doctor user...")
+    doctor = create_doctor()
+    print("Creating patient user...")
+    patient = create_patient()
     
     print("Creating departments and staff...")
     departments, staff_members = create_departments_and_staff(num_departments=3, num_doctors_per_dept=3)
