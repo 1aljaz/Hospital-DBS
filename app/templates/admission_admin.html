@@ -74,7 +74,9 @@
                             </td>
                             <td>
                                 <a href="/update_admission/{{ row.admission_id }}" class="edit-btn">Uredi</a>
-                                <a href="/delete_admission/{{ row.admission_id }}" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</a>
+                                <form action="{{ url_for('main.delete_admission', admission_id=row.admission_id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="edit-btn" style="background-color: #dc3545;" onclick="return confirm('Ste prepričani?')">Izbriši</button>
+                                </form>
                             </td>
                         </tr>
                         {% endfor %}

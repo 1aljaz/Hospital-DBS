@@ -10,6 +10,71 @@ from werkzeug.security import generate_password_hash
 main_bp = Blueprint("main", __name__)
 
 
+def _delete_appointment_record(appointment):
+    for diagnosis in list(appointment.diagnoses):
+        db.session.delete(diagnosis)
+    db.session.delete(appointment)
+
+
+def _delete_patient_record(patient):
+    for appointment in list(patient.appointments):
+        _delete_appointment_record(appointment)
+    for admission in list(patient.admissions):
+        db.session.delete(admission)
+    db.session.delete(patient)
+
+
+def _delete_staff_record(staff):
+    for appointment in list(staff.appointments):
+        _delete_appointment_record(appointment)
+    db.session.delete(staff)
+
+
+def _delete_bed_record(bed):
+    for admission in list(bed.admissions):
+        db.session.delete(admission)
+    db.session.delete(bed)
+
+
+def _delete_room_record(room):
+    for bed in list(room.beds):
+        _delete_bed_record(bed)
+    db.session.delete(room)
+
+
+def _delete_department_record(department):
+    for staff_member in list(department.staff_members):
+        _delete_staff_record(staff_member)
+    for room in list(department.rooms):
+        _delete_room_record(room)
+    db.session.delete(department)
+
+
+def _delete_user_record(user):
+    if user.patient:
+        _delete_patient_record(user.patient)
+    if user.staff:
+        _delete_staff_record(user.staff)
+    db.session.delete(user)
+
+
+def _delete_record_and_redirect(action, success_message, error_message, redirect_url):
+    try:
+        action()
+        db.session.commit()
+        flash(success_message, "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"{error_message}: {str(e)}", "danger")
+    return redirect(redirect_url)
+
+
+def _redirect_for_role(staff, admin_endpoint, doctor_endpoint):
+    if not staff:
+        return url_for(admin_endpoint)
+    return url_for(doctor_endpoint)
+
+
 #za dobit html
 @main_bp.route("/")
 def index():
@@ -45,6 +110,15 @@ def patient_dashboard():
 def appointment_doctor():
     # Dobiš staff id od zdravnika
     staff = current_user.staff
+    if not staff:
+        staff = Staff.query.filter_by(user_id=current_user.user_id).first()
+        if not staff:
+            staff = Staff(user_id=current_user.user_id, role="doctor")
+            db.session.add(staff)
+            db.session.commit()
+        else:
+            current_user.staff = staff
+    
     if not staff:
         return "Error: No staff record found", 404
     
@@ -222,18 +296,13 @@ def update_department(department_id):
 @login_required
 @roles_required("admin")
 def delete_department(department_id):
-
     department = Department.query.get_or_404(department_id)
-    
-    try:
-        db.session.delete(department)
-        db.session.commit()
-        flash("Oddelek uspešno izbrisan", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju oddelka: {str(e)}", "danger")
-    
-    return redirect(url_for("main.department_admin"))
+    return _delete_record_and_redirect(
+        lambda: _delete_department_record(department),
+        "Oddelek uspešno izbrisan",
+        "Napaka pri brisanju oddelka",
+        url_for("main.department_admin")
+    )
 
 
 # CRUD Operations za Staff
@@ -315,14 +384,12 @@ def update_staff(staff_id):
 @roles_required("admin")
 def delete_staff(staff_id):
     staff = Staff.query.get_or_404(staff_id)
-    try:
-        db.session.delete(staff)
-        db.session.commit()
-        flash("Zaposlenega uspešno izbrisan", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju zaposlenega: {str(e)}", "danger")
-    return redirect(url_for("main.staff_admin"))
+    return _delete_record_and_redirect(
+        lambda: _delete_staff_record(staff),
+        "Zaposlenega uspešno izbrisan",
+        "Napaka pri brisanju zaposlenega",
+        url_for("main.staff_admin")
+    )
 
 @main_bp.route("/update_patient/<int:patient_id>", methods=["GET", "POST"])
 @login_required
@@ -351,14 +418,12 @@ def update_patient(patient_id):
 @roles_required("admin")
 def delete_patient(patient_id):
     patient = Patient.query.get_or_404(patient_id)
-    try:
-        db.session.delete(patient)
-        db.session.commit()
-        flash("Pacient uspešno izbrisan", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju pacienta: {str(e)}", "danger")
-    return redirect(url_for("main.patient_admin"))
+    return _delete_record_and_redirect(
+        lambda: _delete_patient_record(patient),
+        "Pacient uspešno izbrisan",
+        "Napaka pri brisanju pacienta",
+        url_for("main.patient_admin")
+    )
 
 # CRUD Operations za Appointmente
 @main_bp.route("/add_appointment", methods=["GET", "POST"])
@@ -491,20 +556,14 @@ def update_appointment_admin(appointment_id):
 @roles_required("doctor", "admin")
 def delete_appointment(appointment_id):
     staff = current_user.staff
-
     appointment = Appointment.query.get_or_404(appointment_id)
-    
-    try:
-        db.session.delete(appointment)
-        db.session.commit()
-        flash("Pregled uspešno izbrisan", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju pregleda: {str(e)}", "danger")
-    
-    if not staff:
-        return redirect(url_for("main.appointment_admin"))
-    return redirect(url_for("main.appointment_doctor"))
+    redirect_url = _redirect_for_role(staff, "main.appointment_admin", "main.appointment_doctor")
+    return _delete_record_and_redirect(
+        lambda: _delete_appointment_record(appointment),
+        "Pregled uspešno izbrisan",
+        "Napaka pri brisanju pregleda",
+        redirect_url
+    )
 
 # CRUD za Diagnoze
 @main_bp.route("/add_diagnosis", methods=["GET", "POST"])
@@ -576,25 +635,32 @@ def update_diagnosis(diagnosis_id):
 @roles_required("doctor", "admin")
 def delete_diagnosis(diagnosis_id):
     staff = current_user.staff
-
     diagnosis = Diagnosis.query.get_or_404(diagnosis_id)
 
     appointment = Appointment.query.get_or_404(diagnosis.appointment_id)
     if staff and appointment.staff_id != staff.staff_id:
         flash("Nimate dostopa do te diagnoze", "danger")
         return redirect(url_for("main.diagnosis_doctor"))
-    
-    try:
-        db.session.delete(diagnosis)
-        db.session.commit()
-        flash("Diagnoza uspešno izbrisana", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju diagnoze: {str(e)}", "danger")
-    
-    if not staff:
-        return redirect(url_for("main.diagnosis_admin"))
-    return redirect(url_for("main.diagnosis_doctor"))
+
+    redirect_url = _redirect_for_role(staff, "main.diagnosis_admin", "main.diagnosis_doctor")
+    return _delete_record_and_redirect(
+        lambda: db.session.delete(diagnosis),
+        "Diagnoza uspešno izbrisana",
+        "Napaka pri brisanju diagnoze",
+        redirect_url
+    )
+
+@main_bp.route("/delete_admission/<int:admission_id>", methods=["GET", "POST"])
+@login_required
+@roles_required("admin")
+def delete_admission(admission_id):
+    admission = Admission.query.get_or_404(admission_id)
+    return _delete_record_and_redirect(
+        lambda: db.session.delete(admission),
+        "Sprejem uspešno izbrisan",
+        "Napaka pri brisanju sprejema",
+        url_for("main.admission_admin")
+    )
 
 # CRUD za admissone
 @main_bp.route("/add_admission", methods=["GET", "POST"])
@@ -665,10 +731,7 @@ def update_admission(admission_id):
 @roles_required("patient")
 def appointment_patient():
     patient = current_user.patient
-    if not patient:
-        return "Error: No patient record found", 404
-    
-    patient_id = patient.patient_id
+    patient_id = patient.patient_id if patient else -1
     
     search = request.args.get('search', '').strip()
     status_filter = request.args.get('status', '').strip()
@@ -691,9 +754,14 @@ def appointment_patient():
 
     data_rows = []
     for apt in appointments:
+        try: 
+            tname = apt.staff_member.name()
+        except:
+            continue
+
         data_rows.append({
             'appointment_id': apt.appointment_id,
-            'staff_name': apt.staff_member.name(),
+            'staff_name': tname,
             'appointment_date': apt.appointment_date,
             'appointment_time': apt.appointment_time,
             'status': apt.status or 'pending'
@@ -706,10 +774,7 @@ def appointment_patient():
 @roles_required("patient")
 def diagnosis_patient():
     patient = current_user.patient
-    if not patient:
-        return "Error: No patient record found", 404
-    
-    patient_id = patient.patient_id
+    patient_id = patient.patient_id if patient else -1
     
     search = request.args.get('search', '').strip()
     
@@ -735,10 +800,7 @@ def diagnosis_patient():
 @roles_required("patient")
 def admission_patient():
     patient = current_user.patient
-    if not patient:
-        return "Error: No patient record found", 404
-    
-    patient_id = patient.patient_id
+    patient_id = patient.patient_id if patient else -1
     
     search = request.args.get('search', '').strip()
     
@@ -939,21 +1001,12 @@ def update_user(user_id):
 @roles_required("admin")
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
-    
-    try:
-        # Delete related records first
-        if user.patient:
-            db.session.delete(user.patient)
-        if user.staff:
-            db.session.delete(user.staff)
-        db.session.delete(user)
-        db.session.commit()
-        flash("Uporabnik uspešno izbrisan", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju uporabnika: {str(e)}", "danger")
-    
-    return redirect(url_for("main.user_admin"))
+    return _delete_record_and_redirect(
+        lambda: _delete_user_record(user),
+        "Uporabnik uspešno izbrisan",
+        "Napaka pri brisanju uporabnika",
+        url_for("main.user_admin")
+    )
 
 # View all patients
 @main_bp.route("/patient_admin")
@@ -1270,18 +1323,13 @@ def update_room(room_id):
 @login_required
 @roles_required("admin")
 def delete_room(room_id):
-
     room = Room.query.get_or_404(room_id)
-    
-    try:
-        db.session.delete(room)
-        db.session.commit()
-        flash("Soba uspešno izbrisana", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju sobe: {str(e)}", "danger")
-    
-    return redirect(url_for("main.room_admin"))
+    return _delete_record_and_redirect(
+        lambda: _delete_room_record(room),
+        "Soba uspešno izbrisana",
+        "Napaka pri brisanju sobe",
+        url_for("main.room_admin")
+    )
 
 
 # View all beds
@@ -1373,16 +1421,11 @@ def update_bed(bed_id):
 @login_required
 @roles_required("admin")
 def delete_bed(bed_id):
-
     bed = Bed.query.get_or_404(bed_id)
-    
-    try:
-        db.session.delete(bed)
-        db.session.commit()
-        flash("Postelja uspešno izbrisana", "success")
-    except Exception as e:
-        db.session.rollback()
-        flash(f"Napaka pri brisanju postelje: {str(e)}", "danger")
-    
-    return redirect(url_for("main.bed_admin"))
+    return _delete_record_and_redirect(
+        lambda: _delete_bed_record(bed),
+        "Postelja uspešno izbrisana",
+        "Napaka pri brisanju postelje",
+        url_for("main.bed_admin")
+    )
 

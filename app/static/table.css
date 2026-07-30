@@ -87,14 +87,37 @@ tr:hover {
 .edit-btn {
     background-color: #28a745;
     color: white;
-    padding: 6px 12px;
-    text-decoration: none;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    display: inline-block;
-    transition: background 0.3s;
-    border: none;
-    cursor: pointer;
+     padding: 5px 10px;
+     text-decoration: none;
+     border-radius: 4px;
+     font-size: 0.85rem;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     width: auto !important;
+     min-width: 80px;
+     white-space: nowrap;
+     margin-right: 8px;
+     vertical-align: middle;
+     box-sizing: border-box;
+}
+
+button.edit-btn {
+    width: auto !important;
+    margin-top: 0;
+    display: inline-flex;
+}
+
+.action-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+.action-btn-group form {
+    display: inline-flex;
 }
 
 .edit-btn:hover {

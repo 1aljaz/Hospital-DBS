@@ -48,7 +48,14 @@ def create_doctor():
     # Check if doctor already exists
     existing_doctor = User.query.filter_by(username="doctor").first()
     if existing_doctor:
-        print("Doctor user already exists, skipping creation.")
+        existing_staff = Staff.query.filter_by(user_id=existing_doctor.user_id).first()
+        if not existing_staff:
+            existing_staff = Staff(user_id=existing_doctor.user_id, role="doctor")
+            db.session.add(existing_staff)
+            db.session.commit()
+            print("Created missing staff record for existing doctor user.")
+        else:
+            print("Doctor user already exists with staff record, skipping creation.")
         return existing_doctor
     
     doctor_user = User(
@@ -59,6 +66,9 @@ def create_doctor():
         phone=None
     )
     db.session.add(doctor_user)
+    db.session.commit()
+    doctor_staff = Staff(user_id=doctor_user.user_id, role="doctor")
+    db.session.add(doctor_staff)
     db.session.commit()
     print("Doctor user created: username='doctor', password='doctor'")
     return doctor_user

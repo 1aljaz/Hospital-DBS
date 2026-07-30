@@ -67,10 +67,12 @@
                             <td>{{ row.gender }}</td>
                             <td>{{ row.address }}</td>
                             <td>
-                                <a href="/update_patient/{{ row.patient_id }}" class="edit-btn">Uredi</a>
-                                <form action="/delete_patient/{{ row.patient_id }}" method="POST" style="display:inline;" onsubmit="return confirm('Ste prepričani, da želite izbrisati tega pacienta?')">
-                                    <button type="submit" class="edit-btn" style="background-color: #dc3545;">Izbriši</button>
-                                </form>
+                                <div class="action-btn-group">
+                                    <a href="/update_patient/{{ row.patient_id }}" class="edit-btn">Uredi</a>
+                                    <form action="/delete_patient/{{ row.patient_id }}" method="POST" onsubmit="return confirm('Ste prepričani, da želite izbrisati tega pacienta?')">
+                                        <button type="submit" class="edit-btn" style="background-color: #dc3545;">Izbriši</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
