@@ -14,8 +14,8 @@ def create_app():
     #login manager
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
-    login_manager.login_message = "Please log in to access this page."
-    login_manager.login_message_category = "info"
+    login_manager.login_message = None
+    login_manager.login_message_category = None
 
     @login_manager.user_loader
     def load_user(user_id):

@@ -12,7 +12,6 @@ def roles_required(*roles):
         @login_required
         def wrapper(*args, **kwargs):
             if current_user.role.value not in roles:
-                flash("Access denied", "danger")
                 return redirect(url_for("main.index"))
             return f(*args, **kwargs)
         return wrapper

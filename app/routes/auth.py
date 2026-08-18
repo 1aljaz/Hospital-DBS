@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, render_template, flash, session
+from flask import Blueprint, request, redirect, url_for, render_template, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.db import db
 from app.models.user import User
@@ -31,7 +31,6 @@ def login():
             print(f"login_user result: {result}, user_id: {user.get_id()}")
             print(f"Session after login: {dict(session)}")
             print(f"Current user authenticated: {current_user.is_authenticated}")
-            flash(f"Logged in as {user.role.value}", "success")
             print(f"{user} succesfully logged in.")
             
             # Get the next URL from Flask-Login if available
@@ -59,7 +58,6 @@ def login():
 
         else:
             print("Invalid username or password")
-            flash("Invalid username or password", "danger")
     print(2)
     return render_template("index.html")
 
@@ -68,5 +66,4 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("Logged out successfully", "success")
     return redirect(url_for("main.index"))

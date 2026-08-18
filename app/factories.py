@@ -162,7 +162,7 @@ def create_rooms_and_beds(departments, beds_per_room=2):
             rooms.append(room)
 
             for _ in range(beds_per_room):
-                bed = Bed(room_id=room.room_id, status=random.choice(["free", "occupied"]))
+                bed = Bed(room_id=room.room_id, status="free")
                 db.session.add(bed)
                 db.session.commit()
                 beds.append(bed)
@@ -193,11 +193,18 @@ def create_appointments(patients, staff_members, num_appointments=50):
 
 def create_admissions(patients, beds, num_admissions=30):
     admissions = []
+    active_bed_ids = set()
+
     for _ in range(num_admissions):
         patient = random.choice(patients)
-        bed = random.choice(beds)
         admitted_date = date.today() - timedelta(days=random.randint(0, 10))
         discharged_date = admitted_date + timedelta(days=random.randint(1, 5)) if random.random() < 0.5 else None
+
+        available_beds = [bed for bed in beds if bed.bed_id not in active_bed_ids]
+        if not available_beds:
+            discharged_date = admitted_date + timedelta(days=1)
+            available_beds = beds
+        bed = random.choice(available_beds)
 
         admission = Admission(
             patient_id=patient.patient_id,
@@ -206,6 +213,9 @@ def create_admissions(patients, beds, num_admissions=30):
             discharged_date=discharged_date
         )
         db.session.add(admission)
+        if discharged_date is None:
+            active_bed_ids.add(bed.bed_id)
+            bed.status = "occupied"
         db.session.commit()
         admissions.append(admission)
     return admissions

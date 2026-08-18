@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import current_user, login_required
 from app.decorators import roles_required
 from app.models import Appointment, Admission, Diagnosis, Staff, Patient, Bed, Department, Room
@@ -8,6 +8,10 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash
 
 main_bp = Blueprint("main", __name__)
+
+
+def flash(*args, **kwargs):
+    return None
 
 
 def _delete_appointment_record(appointment):
@@ -62,10 +66,8 @@ def _delete_record_and_redirect(action, success_message, error_message, redirect
     try:
         action()
         db.session.commit()
-        flash(success_message, "success")
     except Exception as e:
         db.session.rollback()
-        flash(f"{error_message}: {str(e)}", "danger")
     return redirect(redirect_url)
 
 
@@ -73,6 +75,24 @@ def _redirect_for_role(staff, admin_endpoint, doctor_endpoint):
     if not staff:
         return url_for(admin_endpoint)
     return url_for(doctor_endpoint)
+
+
+def _get_available_bed(bed_id, admission_id=None, current_bed_id=None):
+    bed = db.session.get(Bed, bed_id)
+    if bed is None:
+        raise ValueError("Izbrana postelja ne obstaja.")
+
+    active_admission = Admission.query.filter(
+        Admission.bed_id == bed_id,
+        Admission.discharged_date.is_(None),
+        Admission.admission_id != admission_id if admission_id is not None else True
+    ).first()
+    if active_admission or (
+        (bed.status or "").lower() == "occupied" and bed_id != current_bed_id
+    ):
+        raise ValueError("Izbrana postelja je že zasedena.")
+
+    return bed
 
 
 #za dobit html
@@ -673,6 +693,7 @@ def add_admission():
             patient_id = int(request.form.get('patient_id'))
             bed_id = int(request.form.get('bed_id'))
             admission_date = datetime.strptime(request.form.get('admission_date'), '%Y-%m-%d').date()
+            bed = _get_available_bed(bed_id)
 
             admission = Admission(
                 patient_id=patient_id,
@@ -681,6 +702,7 @@ def add_admission():
                 discharged_date=None
             )
             db.session.add(admission)
+            bed.status = "occupied"
             db.session.commit()
             flash("Sprejem uspešno dodan", "success")
             return redirect(url_for("main.admission_admin"))
@@ -702,8 +724,8 @@ def update_admission(admission_id):
     
     if request.method == "POST":
         try:
-            admission.patient_id = int(request.form.get('patient_id'))
-            admission.bed_id = int(request.form.get('bed_id'))
+            patient_id = int(request.form.get('patient_id'))
+            bed_id = int(request.form.get('bed_id'))
             admission.admitted_date = datetime.strptime(request.form.get('admitted_date'), '%Y-%m-%d').date()
             
             discharged_date_str = request.form.get('discharged_date', '').strip()
@@ -711,6 +733,28 @@ def update_admission(admission_id):
                 admission.discharged_date = datetime.strptime(discharged_date_str, '%Y-%m-%d').date()
             else:
                 admission.discharged_date = None
+
+            old_bed = admission.bed
+            new_bed = (
+                _get_available_bed(
+                    bed_id,
+                    admission.admission_id,
+                    admission.bed_id,
+                )
+                if admission.discharged_date is None
+                else db.session.get(Bed, bed_id)
+            )
+            if new_bed is None:
+                raise ValueError("Izbrana postelja ne obstaja.")
+
+            admission.patient_id = patient_id
+            admission.bed_id = bed_id
+            if old_bed and old_bed.bed_id != bed_id:
+                old_bed.status = "free"
+            if admission.discharged_date is None:
+                new_bed.status = "occupied"
+            elif old_bed and old_bed.bed_id == bed_id:
+                new_bed.status = "free"
             
             db.session.commit()
             flash("Sprejem uspešno posodobljen", "success")
