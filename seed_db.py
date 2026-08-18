@@ -11,6 +11,8 @@ from app.factories import (
     create_admissions,
     create_diagnoses
 )
+from app.models.staff import Staff
+from app.models.patient import Patient
 
 app = create_app()
 
@@ -24,9 +26,11 @@ with app.app_context():
     
     print("Creating departments and staff...")
     departments, staff_members = create_departments_and_staff(num_departments=3, num_doctors_per_dept=3)
+    staff_members.append(Staff.query.filter_by(user_id=doctor.user_id).first())
 
     print("Creating patients...")
     patients = create_patients(num_patients=20)
+    patients.append(Patient.query.filter_by(user_id=patient.user_id).first())
 
     print("Creating rooms and beds...")
     rooms, beds = create_rooms_and_beds(departments)

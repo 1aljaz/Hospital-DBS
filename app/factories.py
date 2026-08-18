@@ -91,6 +91,7 @@ def create_patient():
     )
     db.session.add(patient_user)
     db.session.commit()
+    db.session.add(Patient(user_id = patient_user.user_id,gender=random_gender(), address=fake.address()))
     print("Patient user created: username='patient', password='patient'")
     return patient_user
 #konec posameznih
