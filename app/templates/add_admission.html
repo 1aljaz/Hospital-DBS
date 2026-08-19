@@ -3,12 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dodaj sprejem - Admin</title>
+    <title>Dodaj sprejem</title>
     <link rel="stylesheet" href="../static/style.css">
     <link rel="stylesheet" href="../static/home.css">
 </head>
 <body>
 
+    {% if user.role.value == "doctor" %}
+    <nav class="navbar">
+        <a href="{{ url_for('main.doctor_dashboard') }}" class="home-btn">🏠</a>
+        <div class="nav-right">
+            <div class="nav-links">
+                <a href="{{ url_for('main.appointment_doctor') }}">Pregledi</a>
+                <a href="{{ url_for('main.admission_doctor') }}">Sprejemi</a>
+                <a href="{{ url_for('main.diagnosis_doctor') }}">Diagnoze</a>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
+        </div>
+    </nav>
+    {% else %}
     <nav class="navbar">
         <a href="{{ url_for('main.admin_dashboard') }}" class="home-btn">🏠</a>
         <div class="nav-right">
@@ -19,13 +32,14 @@
                 <a href="/patient_admin">Pacienti</a>
                 <a href="/staff_admin">Zaposleni</a>
                 <a href="/room_admin">Sobe</a>
-                <a href="/bed_admin">Postelje</a>    
+                <a href="/bed_admin">Postelje</a>
                 <a href="/admission_admin">Sprejemi</a>
                 <a href="/diagnosis_admin">Diagnoze</a>
             </div>
             <a href="{{ url_for('auth.logout') }}" class="logout-btn">Odjava</a>
         </div>
     </nav>
+    {% endif %}
 
     <div class="content">
         <h1>Dodaj nov sprejem</h1>
@@ -60,7 +74,11 @@
 
                 <div style="display: flex; gap: 10px;">
                     <button type="submit" style="flex: 1; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Dodaj sprejem</button>
+                    {% if user.role.value == "doctor" %}
+                    <a href="{{ url_for('main.admission_doctor') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
+                    {% else %}
                     <a href="{{ url_for('main.admission_admin') }}" style="flex: 1; padding: 10px; background-color: #6c757d; color: white; text-align: center; text-decoration: none; border-radius: 4px;">Prekliči</a>
+                    {% endif %}
                 </div>
             </form>
         </div>

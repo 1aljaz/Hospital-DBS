@@ -97,6 +97,7 @@ def create_patient():
 #konec posameznih
 
 def create_departments_and_staff(num_departments=3, num_doctors_per_dept=3):
+    """Ustvari oddelke in vsakemu dodeli ustvarjene zdravnike."""
     departments = []
     staff_members = []
 
@@ -128,6 +129,7 @@ def create_departments_and_staff(num_departments=3, num_doctors_per_dept=3):
     return departments, staff_members
 
 def create_patients(num_patients=20):
+    """Ustvari naključne uporabnike in pripadajoče zapise pacientov."""
     patients = []
     for _ in range(num_patients):
         user = User(
@@ -152,11 +154,12 @@ def create_patients(num_patients=20):
 
 
 def create_rooms_and_beds(departments, beds_per_room=2):
+    """Ustvari dve sobi na oddelek in določeno število postelj na sobo."""
     rooms = []
     beds = []
 
     for dept in departments:
-        for _ in range(2):  # 2 rooms per department
+        for _ in range(2):
             room = Room(type=random.choice(["ICU", "General"]), department_id=dept.department_id)
             db.session.add(room)
             db.session.commit()
@@ -171,6 +174,7 @@ def create_rooms_and_beds(departments, beds_per_room=2):
 
 
 def create_appointments(patients, staff_members, num_appointments=50):
+    """Ustvari naključne preglede za podane paciente in zaposlene."""
     appointments = []
     for _ in range(num_appointments):
         patient = random.choice(patients)
@@ -193,6 +197,11 @@ def create_appointments(patients, staff_members, num_appointments=50):
 
 
 def create_admissions(patients, beds, num_admissions=30):
+    """Ustvari sprejeme in prepreči hkratno zasedenost iste postelje.
+
+    Če so vse postelje trenutno zasedene, ustvari zaključen sprejem, da lahko
+    polnjenje baze še vedno ustvari zahtevano število zapisov.
+    """
     admissions = []
     active_bed_ids = set()
 
@@ -201,6 +210,7 @@ def create_admissions(patients, beds, num_admissions=30):
         admitted_date = date.today() - timedelta(days=random.randint(0, 10))
         discharged_date = admitted_date + timedelta(days=random.randint(1, 5)) if random.random() < 0.5 else None
 
+        # Če je dovolj prostora, naj bodo aktivni sprejemi na različnih posteljah.
         available_beds = [bed for bed in beds if bed.bed_id not in active_bed_ids]
         if not available_beds:
             discharged_date = admitted_date + timedelta(days=1)
@@ -226,8 +236,10 @@ from app.models.diagnosis import Diagnosis
 
 def create_diagnoses(appointments, num_diagnoses=None):
     """
-    Create diagnoses linked to appointments.
-    If num_diagnoses is None, create one diagnosis per appointment randomly.
+    Ustvari diagnoze, povezane s pregledi.
+
+    Če število ni določeno, vsak pregled z verjetnostjo 70 % dobi eno diagnozo.
+    Sicer vsak pregled dobi ``num_diagnoses`` zapisov.
     """
     diagnoses = []
     for appt in appointments:
@@ -251,7 +263,6 @@ def create_diagnoses(appointments, num_diagnoses=None):
                 db.session.commit()
                 diagnoses.append(diag)
         else:
-            # Create fixed number of diagnoses
             for _ in range(num_diagnoses):
                 description = random.choice([
                     "Flu",

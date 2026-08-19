@@ -1,4 +1,4 @@
-from flask import Blueprint, request, redirect, url_for, render_template, session
+from flask import Blueprint, request, redirect, url_for, render_template
 from flask_login import login_user, logout_user, login_required, current_user
 from app.db import db
 from app.models.user import User
@@ -23,42 +23,28 @@ def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        print(f"Login attempt for username: {username}")
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
-            print(f"Password check passed for user: {user.user_id}, role: {user.role.value}")
-            result = login_user(user, remember=True)
-            print(f"login_user result: {result}, user_id: {user.get_id()}")
-            print(f"Session after login: {dict(session)}")
-            print(f"Current user authenticated: {current_user.is_authenticated}")
-            print(f"{user} succesfully logged in.")
+            login_user(user, remember=True)
             
             # Get the next URL from Flask-Login if available
             next_url = request.args.get('next')
             if next_url:
-                print(f"Redirecting to next URL: {next_url}")
                 return redirect(next_url)
             
             if user.is_admin():
                 target_url = url_for("main.admin_dashboard")
-                print(f"Redirecting to admin dashboard: {target_url}")
                 return redirect(target_url)
             elif user.is_doctor():
                 target_url = url_for("main.doctor_dashboard")
-                print(f"Redirecting to doctor dashboard: {target_url}")
                 return redirect(target_url)
             elif user.is_patient():
                 target_url = url_for("main.patient_dashboard")
-                print(f"Redirecting to patient dashboard: {target_url}")
                 return redirect(target_url)
             else:
                 target_url = url_for("main.index")
-                print(f"Redirecting to main index: {target_url}")
                 return redirect(target_url)
 
-        else:
-            print("Invalid username or password")
-    print(2)
     return render_template("index.html")
 
 # LOGOUT

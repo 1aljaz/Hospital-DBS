@@ -20,14 +20,8 @@ def create_app():
     @login_manager.user_loader
     def load_user(user_id):
         try:
-            user = User.query.get(int(user_id))
-            if user:
-                print(f"User loaded: {user.user_id}, {user.username}, role: {user.role.value}")
-            else:
-                print(f"User not found for user_id: {user_id}")
-            return user
-        except Exception as e:
-            print(f"Error loading user {user_id}: {e}")
+            return User.query.get(int(user_id))
+        except Exception:
             return None
 
     # Initialize extensions

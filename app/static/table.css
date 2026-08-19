@@ -79,9 +79,9 @@ tr:hover {
     text-transform: capitalize;
 }
 
-.status-tag.active { background: #d4edda; color: #155724; }
-.status-tag.pending { background: #fff3cd; color: #856404; }
-.status-tag.inactive { background: #f8d7da; color: #721c24; }
+.status-tag.scheduled { background: #fff3cd; color: #856404; }
+.status-tag.canceled { background: #f8d7da; color: #721c24; }
+.status-tag.completed { background: #d4edda; color: #155724; }
 
 /* Gumb za urejanje (za zdravniški in admin pogled) */
 .edit-btn {
